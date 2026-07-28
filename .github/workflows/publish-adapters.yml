@@ -94,3 +94,5 @@ jobs:
               --source https://api.nuget.org/v3/index.json \
               --skip-duplicate
           fi
+
+# registered 2026-07-28T08:27:37.9166825-05:00
