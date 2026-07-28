@@ -131,10 +131,11 @@ runs:
       run: |
         set -euo pipefail
         python -m pip install --upgrade pip
+        # Pin mcp<2 until mcp-test-harness supports SDK 2.0 stdio types.
         if [ "$HARNESS_VERSION" = "latest" ]; then
-          python -m pip install "mcp-test-harness>=3.0.9"
+          python -m pip install "mcp>=1.2,<2" "mcp-test-harness>=3.0.9"
         else
-          python -m pip install "mcp-test-harness==$HARNESS_VERSION"
+          python -m pip install "mcp>=1.2,<2" "mcp-test-harness==$HARNESS_VERSION"
         fi
         python -m pip install "${GITHUB_WORKSPACE}"
         python -m pip show mcp-test-suite

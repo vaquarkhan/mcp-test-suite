@@ -8,8 +8,9 @@
 | [tutorials/](tutorials/) | Per-language walkthroughs |
 | [MULTI_LANGUAGE.md](MULTI_LANGUAGE.md) | Adapters + architecture |
 | [DOCKER.md](DOCKER.md) | Suite OCI image (PyPI engine) |
-| [DOWNLOADS.md](DOWNLOADS.md) | Registry coordinates |
-| [PUBLISHING.md](PUBLISHING.md) | Adapter publish (not PyPI engine) |
+| [DOWNLOADS.md](DOWNLOADS.md) | GitHub Packages + Releases (Maven / npm / NuGet / Go) |
+| [PUBLISHING.md](PUBLISHING.md) | Adapter publish via Actions (not PyPI engine) |
+| [RELEASING.md](RELEASING.md) | Release checklist |
 | [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md) | Engine vs connectors policy |
 | [CURSOR_IDE.md](CURSOR_IDE.md) | Cursor agent workflow |
 | [CI_AND_REPORTS.md](CI_AND_REPORTS.md) | Action + reports |

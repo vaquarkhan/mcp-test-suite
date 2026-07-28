@@ -4,13 +4,19 @@
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 
 ## Module
 
+```bash
+go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
+```
+
+Or local replace while developing:
+
 ```go
-require github.com/vaquarkhan/mcp-test-suite/adapters/gotest v0.0.0
+require github.com/vaquarkhan/mcp-test-suite/adapters/gotest v4.0.0
 
 replace github.com/vaquarkhan/mcp-test-suite/adapters/gotest => ../mcp-test-suite/adapters/gotest
 ```

@@ -1,7 +1,7 @@
-"""Minimal stdio MCP server for Action / CI smoke (stdlib only — no FastMCP).
+"""Minimal stdio MCP server for Action / CI smoke (stdlib only).
 
-Speaks MCP over stdin/stdout with Content-Length framing so e2e works with
-mcp SDK 1.x or 2.x (FastMCP was removed from ``mcp.server`` in 2.0).
+Uses **newline-delimited JSON** (one JSON-RPC object per line) to match
+``mcp-test-harness`` / ``mcp.client.stdio`` framing — not Content-Length LSP style.
 """
 
 from __future__ import annotations
@@ -27,33 +27,9 @@ ECHO_TOOL = {
 }
 
 
-def _read_message() -> dict[str, Any] | None:
-    headers: dict[str, str] = {}
-    while True:
-        line = sys.stdin.buffer.readline()
-        if not line:
-            return None
-        if line in (b"\r\n", b"\n"):
-            break
-        decoded = line.decode("utf-8", errors="replace").rstrip("\r\n")
-        if ":" not in decoded:
-            continue
-        key, value = decoded.split(":", 1)
-        headers[key.strip().lower()] = value.strip()
-    length = int(headers.get("content-length", "0") or "0")
-    if length <= 0:
-        return None
-    body = sys.stdin.buffer.read(length)
-    if not body:
-        return None
-    return json.loads(body.decode("utf-8"))
-
-
-def _write_message(payload: dict[str, Any]) -> None:
-    data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-    sys.stdout.buffer.write(f"Content-Length: {len(data)}\r\n\r\n".encode("ascii"))
-    sys.stdout.buffer.write(data)
-    sys.stdout.buffer.flush()
+def _write(payload: dict[str, Any]) -> None:
+    sys.stdout.write(json.dumps(payload, separators=(",", ":")) + "\n")
+    sys.stdout.flush()
 
 
 def _result(req_id: Any, result: Any) -> dict[str, Any]:
@@ -69,7 +45,6 @@ def _handle(msg: dict[str, Any]) -> dict[str, Any] | None:
     req_id = msg.get("id")
     params = msg.get("params") or {}
 
-    # Notifications (no id) — acknowledge by ignoring.
     if req_id is None:
         return None
 
@@ -104,14 +79,15 @@ def _handle(msg: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def main() -> None:
-    while True:
-        try:
-            msg = _read_message()
-        except Exception as exc:  # noqa: BLE001 — keep server alive for bad frames
-            log.warning("read failed: %s", exc)
+    for raw in sys.stdin:
+        line = raw.strip()
+        if not line:
             continue
-        if msg is None:
-            break
+        try:
+            msg = json.loads(line)
+        except json.JSONDecodeError as exc:
+            log.warning("bad json: %s", exc)
+            continue
         try:
             reply = _handle(msg)
         except Exception as exc:  # noqa: BLE001
@@ -121,7 +97,7 @@ def main() -> None:
             else:
                 reply = None
         if reply is not None:
-            _write_message(reply)
+            _write(reply)
 
 
 if __name__ == "__main__":

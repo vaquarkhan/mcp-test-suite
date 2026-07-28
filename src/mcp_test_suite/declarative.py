@@ -288,7 +288,8 @@ def _build_case_func(
                 expected=case.expected,
                 validate_against_input_schema=case.validate_input_schema,
             )
-        except MCPAssertionError:
+        except Exception:
+            # Protocol/tool errors (McpError) and assertion failures both satisfy expect_error.
             if case.expect_error:
                 return
             raise

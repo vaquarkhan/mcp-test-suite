@@ -8,7 +8,7 @@ Use this as an **internal checklist** when promoting releases (URLs and forms ch
 
 | Platform | Suggested action |
 |----------|------------------|
-| **Maven Central / npm / NuGet / Go / Docker** | Public download coordinates and badges: [DOWNLOADS.md](DOWNLOADS.md). Maintainer publish steps: [PUBLISHING.md](PUBLISHING.md). |
+| **GitHub Packages / Releases / Go / Docker** | Public download coordinates and badges: [DOWNLOADS.md](DOWNLOADS.md). Maintainer publish steps: [PUBLISHING.md](PUBLISHING.md). |
 | **Official MCP Registry** | When publishing [tags](https://github.com/vaquarkhan/mcp-test-suite), keep the repo [server.json](../server.json) and PyPI [project] metadata (`name`, `description`, [project.urls] **Homepage** / **Repository** in [pyproject.toml](../pyproject.toml)) aligned. Link **What’s new** to [CHANGELOG.md](../CHANGELOG.md) in release notes or registry “details” if the platform allows a URL. This project is a **test harness and CLI** that drives MCP servers; it is *not* an MCP server implementation—describe it accurately in any listing. |
 | **Smithery** | If you ship an MCP *server* that includes or documents harness-based tests, you can still cross-link; for the harness package itself, prefer **PyPI** and **GitHub** as primary discovery. |
 | **[Glama](https://glama.ai/)** | Claim or add a listing (testing / developer tooling) with an accurate short description and repo link. |

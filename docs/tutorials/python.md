@@ -4,7 +4,8 @@
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+# or: pip install .   # from a clone
 ```
 
 ## Path A — declarative (recommended for shared contracts)

@@ -25,7 +25,7 @@ pip-wheel-metadata/
 *.spec.bak
 *.spec~
 
-# Test / coverage
+# Test / coverage / local harness cache
 .pytest_cache/
 .coverage
 .coverage.*
@@ -35,6 +35,11 @@ junit*.xml
 test-results/
 .tox/
 .nox/
+.mcp_test_harness/
+mcp-test-report.json
+mcp-security.sarif
+mcp-pr-summary.md
+report.html
 
 # Logs and temp
 *.log
@@ -42,6 +47,7 @@ test-results/
 *.temp
 tmp/
 temp/
+_smoke_*.py
 
 # OS
 .DS_Store
@@ -71,6 +77,12 @@ Desktop.ini
 .env
 .env.*
 !.env.example
+*.pem
+*.p12
+*.key
+npmrc.local
+.npmrc
+!.npmrc.example
 
 # Project extras
 .mypy_tmp/
@@ -81,6 +93,34 @@ site/
 .docusaurus/
 .cache/
 
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-error.log*
+*.tgz
+!docs/**/*.tgz
+
+# Java / Maven / Gradle
+adapters/**/target/
+**/target/
+.mvn/wrapper/maven-wrapper.jar
+*.class
+.gradle/
+**/build/
+!docs/**/build/
+
+# .NET
+**/bin/
+**/obj/
+*.user
+*.nupkg
+*.snupkg
+project.lock.json
+
+# Go
+adapters/**/vendor/
+
 # Misc
 *.orig
 *.bak
+*.swp

@@ -12,28 +12,24 @@ Details: [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md).
 
 ## What *this* repo publishes
 
-| Artifact | Trigger | Workflow |
-|----------|---------|----------|
-| **Maven Central** (`mcp-test-suite-junit5`) | `workflow_dispatch` → adapters | [publish-adapters.yml](../.github/workflows/publish-adapters.yml) |
-| **npm** (`@vaquarkhan/mcp-test-suite-jest`) | same | same |
-| **NuGet** (`McpTestSuite.Xunit`) | same | same |
-| **Go module** | git tag `adapters/gotest/v*` | push tag (no PyPI) |
+| Artifact | Where | Trigger |
+|----------|-------|---------|
+| **Maven** `io.github.vaquarkhan:mcp-test-suite-junit5` | GitHub Packages + Release JAR | [publish-adapters.yml](../.github/workflows/publish-adapters.yml) |
+| **npm** `@vaquarkhan/mcp-test-suite-jest` | GitHub Packages + Release `.tgz` | same |
+| **NuGet** `McpTestSuite.Xunit` | GitHub Packages + Release `.nupkg` | same |
+| **Go module** | git tag `adapters/gotest/v*` | push tag |
 | **GHCR Docker** (optional) | tag `v*` | [docker-publish.yml](../.github/workflows/docker-publish.yml) |
+
+Install coordinates: [DOWNLOADS.md](DOWNLOADS.md).
 
 ## Release checklist (adapters)
 
-1. Bump versions in `adapters/*/pom.xml`, `package.json`, `.csproj`, `go.mod` tags.
+1. Bump versions in `adapters/*/pom.xml`, `package.json`, `.csproj`, Go tag.
 2. Update [CHANGELOG.md](../CHANGELOG.md) and [DOWNLOADS.md](DOWNLOADS.md).
-3. Run **Actions → Publish language adapters** (`dry_run: false`, target `all` or one adapter).
+3. Run **Actions → Publish language adapters** (`dry_run: false`, version e.g. `4.0.0`).
 4. Tag Go module if needed: `git tag adapters/gotest/v4.0.0 && git push origin adapters/gotest/v4.0.0`.
 5. For the **Python engine**, cut the release in **mcp-test-harness**, not here.
 
-## Docker tags (optional, this repo)
+## Engine constraint
 
-If `docker-publish.yml` runs on `v*`:
-
-```bash
-docker pull ghcr.io/vaquarkhan/mcp-test-harness:latest
-```
-
-Prefer keeping GHCR publishing on the harness repo if you want a single image source of truth.
+Suite connectors pin `mcp>=1.2,<2` until `mcp-test-harness` supports MCP SDK 2.0 stdio types.

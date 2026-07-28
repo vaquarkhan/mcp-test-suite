@@ -4,19 +4,25 @@
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 # ensure mcp-suite is on PATH
 ```
 
 ## Link / install the Jest adapter
 
+Add `.npmrc` (GitHub Packages requires a PAT with `read:packages`):
+
+```ini
+@vaquarkhan:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
+```
+
 ```bash
-# GitHub Packages
 npm install -D @vaquarkhan/mcp-test-suite-jest
 
-# or from source
-cd adapters/jest
-npm install && npm run build && npm link
+# or from Release / source
+# npm install -D ./vaquarkhan-mcp-test-suite-jest-4.0.0.tgz
+cd adapters/jest && npm install && npm run build && npm link
 ```
 
 In your app (when using link):

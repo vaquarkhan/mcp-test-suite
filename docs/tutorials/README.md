@@ -16,8 +16,11 @@ Each tutorial uses the **same** `mcp-suite.yaml` contract and the **PyPI** engin
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .          # from mcp-test-suite root → installs mcp-suite
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"   # → mcp-suite
+# or from a clone: pip install .
 mcp-suite --version
 ```
+
+Adapter downloads (Maven / npm / NuGet / Go / Release assets): [../DOWNLOADS.md](../DOWNLOADS.md)
 
 Architecture overview: [../MULTI_LANGUAGE.md](../MULTI_LANGUAGE.md) · Examples: [../../examples/frameworks/](../../examples/frameworks/)

@@ -25,6 +25,8 @@ classifiers = [
 ]
 dependencies = [
   "mcp-test-harness>=3.0.9",
+  # Harness 3.0.9 stdio client is incompatible with mcp 2.0 (JSONRPCMessage UnionType).
+  "mcp>=1.2,<2",
   "pyyaml>=6.0",
 ]
 

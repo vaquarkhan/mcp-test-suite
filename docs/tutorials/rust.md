@@ -6,7 +6,7 @@ Rust packs use the shared YAML file and shell out to `mcp-suite` from an integra
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 
 ## Integration test sketch

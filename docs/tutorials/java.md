@@ -4,17 +4,13 @@
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+# mcp-suite must be on PATH
 ```
 
-## Install JUnit adapter into local Maven
+## Install JUnit adapter
 
-```bash
-cd adapters/junit5
-mvn -q clean install
-```
-
-## Dependency
+**GitHub Packages** (see [DOWNLOADS.md](../DOWNLOADS.md) for `settings.xml`):
 
 ```xml
 <dependency>
@@ -25,7 +21,13 @@ mvn -q clean install
 </dependency>
 ```
 
-(Until Central publish, use the local `mvn install` artifact.)
+Or from source / Release JAR:
+
+```bash
+cd adapters/junit5 && mvn -q clean install
+# or download mcp-test-suite-junit5-4.0.0.jar from
+# https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0
+```
 
 ## Test
 
