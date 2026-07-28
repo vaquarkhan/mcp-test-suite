@@ -1,12 +1,22 @@
 # Downloads (v4.0.0)
 
-**Package downloads:**
+**Confirmed package pages (published):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
+[Java / Maven](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) ·
+[Node / npm](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest) ·
 [Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
+[.NET / NuGet](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) ·
+[Release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
+
+| Registry | Package | Version |
+|----------|---------|---------|
+| **PyPI** | [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/) | ≥3.0.9 |
+| **Maven (GitHub Packages)** | [`io.github.vaquarkhan:mcp-test-suite-junit5`](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) | 4.0.0 |
+| **npm (GitHub Packages)** | [`@vaquarkhan/mcp-test-suite-jest`](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest) | 4.0.0 |
+| **NuGet (GitHub Packages)** | [`McpTestSuite.Xunit`](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) | 4.0.0 |
+| **Go modules** | [`adapters/gotest`](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) | v4.0.0 |
+
+GitHub Packages installs need a PAT with `read:packages`. Direct [Release](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) JAR / `.tgz` / `.nupkg` downloads do not.
 
 **Engine (PyPI):** [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/)  
 **Adapters:** GitHub Packages + [Release v4.0.0](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
@@ -40,6 +50,7 @@ PyPI: https://pypi.org/project/mcp-test-harness/
 
 ## 1. Java / Kotlin — Maven (GitHub Packages)
 
+**Package page:** https://github.com/vaquarkhan/mcp-test-suite/packages/3158511  
 **Coordinates:** `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0`
 
 ### `~/.m2/settings.xml` (one-time)

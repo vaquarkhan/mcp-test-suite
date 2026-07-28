@@ -60,6 +60,20 @@ Traditional editor tips (snippets, extensions, terminal): [EDITORS.md](EDITORS.m
 
 ---
 
+## Cursor skills
+
+Project skills in [`.cursor/skills/`](../.cursor/skills/):
+
+| Skill | When to use |
+|-------|-------------|
+| [`mcp-test-suite`](../.cursor/skills/mcp-test-suite/SKILL.md) | Install engine, run try/suite, IDE MCP wiring |
+| [`mcp-suite-yaml`](../.cursor/skills/mcp-suite-yaml/SKILL.md) | Author declarative suite YAML |
+| [`mcp-adapter-install`](../.cursor/skills/mcp-adapter-install/SKILL.md) | Maven / npm / NuGet / Go adapter installs |
+
+Also: [`.cursorrules`](../.cursorrules) · [AGENTS.md](../AGENTS.md)
+
+---
+
 ## Cursor
 
 Full guide: **[CURSOR_IDE.md](CURSOR_IDE.md)**

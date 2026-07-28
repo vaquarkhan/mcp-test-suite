@@ -92,7 +92,20 @@ jobs:
         working-directory: adapters/jest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish
+        run: |
+          set +e
+          out="$(npm publish 2>&1)"
+          status=$?
+          set -e
+          echo "$out"
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+          if echo "$out" | grep -q "Cannot publish over existing version\|E409"; then
+            echo "::warning::npm package version already published; continuing"
+            exit 0
+          fi
+          exit "$status"
       - uses: actions/upload-artifact@v4
         with:
           name: jest-npm
@@ -126,22 +139,15 @@ jobs:
           path: dist/nuget/*
           if-no-files-found: error
 
-  release:
-    needs: [junit5, jest, xunit]
+  packages-visibility:
     if: ${{ inputs.dry_run == false }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist-adapters
       - name: Make GitHub Packages public
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
-          # Best-effort: public package pages + inherit public-repo visibility.
-          # GitHub Packages still requires a PAT with read:packages to *download*.
+          set +e
           for spec in \
             "maven/io.github.vaquarkhan.mcp-test-suite-junit5" \
             "npm/mcp-test-suite-jest" \
@@ -153,11 +159,18 @@ jobs:
             gh api --method PUT \
               "/user/packages/${type}/${name}/visibility" \
               -f visibility=public \
-              || gh api --method PUT \
-              "/orgs/${{ github.repository_owner }}/packages/${type}/${name}/visibility" \
-              -f visibility=public \
-              || echo "::warning::Could not set visibility for $type/$name (may already be public or API unsupported)"
+              || echo "::warning::Could not set visibility for $type/$name (UI may be required)"
           done
+
+  release:
+    needs: [junit5, jest, xunit]
+    if: ${{ inputs.dry_run == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist-adapters
       - name: Create / update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -172,7 +185,7 @@ jobs:
           **Engine (PyPI):** \`pip install mcp-test-harness\`
 
           ### Package pages (GitHub Packages)
-          - **Maven:** https://github.com/${{ github.repository }}/packages?runtime=maven
+          - **Maven:** https://github.com/${{ github.repository }}/packages/3158511
           - **npm:** https://github.com/users/${{ github.repository_owner }}/packages/npm/package/mcp-test-suite-jest
           - **NuGet:** https://github.com/users/${{ github.repository_owner }}/packages/nuget/package/McpTestSuite.Xunit
 

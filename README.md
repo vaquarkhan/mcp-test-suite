@@ -8,12 +8,13 @@
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
+[Java / Maven](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) ·
+[Node / npm](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest) ·
 [Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
-[Install guide](docs/DOWNLOADS.md)
+[.NET / NuGet](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) ·
+[Release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
+[Install guide](docs/DOWNLOADS.md) ·
+[Skills](.cursor/skills/)
 
 [![Release](https://img.shields.io/github/v/release/vaquarkhan/mcp-test-suite?label=adapters&display_name=tag)](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
 [![PyPI engine](https://img.shields.io/pypi/v/mcp-test-harness?label=engine)](https://pypi.org/project/mcp-test-harness/)
@@ -43,6 +44,8 @@ mcp-test --version && mcp-suite --version
 
 ### Java / Kotlin (Maven — GitHub Packages)
 
+**Package page:** [io.github.vaquarkhan.mcp-test-suite-junit5](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) · **coords:** `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0`
+
 ```xml
 <repositories>
   <repository>
@@ -62,6 +65,8 @@ JAR also on [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag
 
 ### Node / TypeScript (npm — GitHub Packages)
 
+**Package page:** [@vaquarkhan/mcp-test-suite-jest](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest)
+
 ```ini
 @vaquarkhan:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
@@ -80,6 +85,8 @@ go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
 ```
 
 ### .NET (NuGet — GitHub Packages)
+
+**Package page:** [McpTestSuite.Xunit](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit)
 
 ```bash
 dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
@@ -146,6 +153,8 @@ HTML / JUnit / JSON / SARIF reports work for every language via the shared engin
 Works with **Cursor**, **Kiro**, **Google Antigravity**, **Gemini Code Assist**, **ChatGPT**, **OpenAI Codex**, **VS Code**, **GitHub Copilot**, **Windsurf**, **JetBrains**, **Zed**, and more.
 
 [docs/IDE_INTEGRATION.md](docs/IDE_INTEGRATION.md) · [Cursor](docs/CURSOR_IDE.md) · [`.cursorrules`](.cursorrules) · [AGENTS.md](AGENTS.md)
+
+**Cursor skills** (project): [`.cursor/skills/`](.cursor/skills/) — `mcp-test-suite`, `mcp-suite-yaml`, `mcp-adapter-install`
 
 ## Docs
 
