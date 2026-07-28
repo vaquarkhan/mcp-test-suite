@@ -40,7 +40,7 @@ type Client struct {
 // New returns a Client. Empty Binary defaults to "mcp-test" on PATH.
 func New(opts Options) *Client {
 	if opts.Binary == "" {
-		opts.Binary = envOr("MCP_TEST_BIN", "mcp-test")
+		opts.Binary = envOr("MCP_SUITE_BIN", envOr("MCP_TEST_BIN", "mcp-suite"))
 	}
 	if opts.Transport == "" {
 		opts.Transport = "stdio"
@@ -57,7 +57,7 @@ func (c *Client) Try(ctx context.Context) (Result, error) {
 	return c.run(ctx, args)
 }
 
-// RunSuite executes the declarative suite via mcp-test run.
+// RunSuite executes the declarative suite via mcp-suite run.
 func (c *Client) RunSuite(ctx context.Context) (Result, error) {
 	args := []string{
 		"run",

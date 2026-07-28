@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 480" role="img" aria-labelledby="title desc">
+  <title id="title">MCP Test Suite feature overview</title>
+  <desc id="desc">Declarative YAML, language adapters, Docker, and CI over the PyPI harness engine.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#164e63"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="480" rx="18" fill="url(#bg)"/>
+  <text x="700" y="48" text-anchor="middle" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">
+    What ships in mcp-test-suite
+  </text>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="48" y="90" width="300" height="150" rx="14" fill="#0b1220" stroke="#22d3ee"/>
+    <text x="198" y="130" text-anchor="middle" fill="#67e8f9" font-size="18" font-weight="700">Declarative YAML</text>
+    <text x="198" y="165" text-anchor="middle" fill="#cbd5e1" font-size="14">mcp-suite.yaml</text>
+    <text x="198" y="190" text-anchor="middle" fill="#94a3b8" font-size="13">Same cases for every language</text>
+    <text x="198" y="215" text-anchor="middle" fill="#94a3b8" font-size="13">mcp-suite run</text>
+
+    <rect x="380" y="90" width="300" height="150" rx="14" fill="#0b1220" stroke="#34d399"/>
+    <text x="530" y="130" text-anchor="middle" fill="#6ee7b7" font-size="18" font-weight="700">Language adapters</text>
+    <text x="530" y="165" text-anchor="middle" fill="#cbd5e1" font-size="14">Jest · JUnit5 · Go · xUnit</text>
+    <text x="530" y="190" text-anchor="middle" fill="#94a3b8" font-size="13">Thin CLIs — no protocol fork</text>
+    <text x="530" y="215" text-anchor="middle" fill="#94a3b8" font-size="13">examples/frameworks/*</text>
+
+    <rect x="712" y="90" width="300" height="150" rx="14" fill="#0b1220" stroke="#a78bfa"/>
+    <text x="862" y="130" text-anchor="middle" fill="#c4b5fd" font-size="18" font-weight="700">Docker + Action</text>
+    <text x="862" y="165" text-anchor="middle" fill="#cbd5e1" font-size="14">ghcr.io/…/mcp-test-suite</text>
+    <text x="862" y="190" text-anchor="middle" fill="#94a3b8" font-size="13">pip install harness @ build</text>
+    <text x="862" y="215" text-anchor="middle" fill="#94a3b8" font-size="13">Language auto-detect CI</text>
+
+    <rect x="1044" y="90" width="300" height="150" rx="14" fill="#0b1220" stroke="#fbbf24"/>
+    <text x="1194" y="130" text-anchor="middle" fill="#fcd34d" font-size="18" font-weight="700">PyPI engine</text>
+    <text x="1194" y="165" text-anchor="middle" fill="#cbd5e1" font-size="14">mcp-test-harness</text>
+    <text x="1194" y="190" text-anchor="middle" fill="#94a3b8" font-size="13">Not published from this repo</text>
+    <text x="1194" y="215" text-anchor="middle" fill="#94a3b8" font-size="13">Upgrade = engine updates</text>
+  </g>
+
+  <rect x="48" y="280" width="1304" height="150" rx="14" fill="#0b1220" stroke="#334155"/>
+  <text x="700" y="330" text-anchor="middle" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">
+    Tutorials per language · e2e smoke against a real MCP fixture · fail early in CI
+  </text>
+  <text x="700" y="370" text-anchor="middle" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="15">
+    docs/tutorials/ · tests/e2e/ · examples/frameworks/
+  </text>
+</svg>

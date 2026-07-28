@@ -9,7 +9,9 @@ public sealed class McpClientOptions
     public string Suite { get; init; } = "mcp-suite.yaml";
     public string? Config { get; init; }
     public string Binary { get; init; } =
-        Environment.GetEnvironmentVariable("MCP_TEST_BIN") ?? "mcp-test";
+        Environment.GetEnvironmentVariable("MCP_SUITE_BIN")
+        ?? Environment.GetEnvironmentVariable("MCP_TEST_BIN")
+        ?? "mcp-suite";
     public string Transport { get; init; } = "stdio";
     public string? WorkingDirectory { get; init; }
 }

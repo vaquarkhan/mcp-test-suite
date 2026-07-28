@@ -1,79 +1,49 @@
 ## Cursor IDE Integration
 
-Cursor is an AI-first code editor with native support for Model Context Protocol (MCP). Integrate **mcp-test-suite** so you and the Cursor agent can validate MCP tool schemas and implementations while coding.
+Cursor is an AI-first code editor with native MCP support. Use **mcp-test-suite** connectors (engine from PyPI) so you and the agent validate tools while coding.
 
-### 1. Auto-validate via Cursor Agent Rules
+### Prereq
 
-Create `.cursor/rules/mcp-testing.mdc` (or `.cursorrules`) in your project root:
-
-```yaml
----
-description: Rules for modifying and testing MCP servers
-globs: ["src/**/*.ts", "src/**/*.py", "src/**/*.java", "src/**/*.go", "mcp-suite.yaml", "mcp-test.yaml"]
----
-
-# MCP Server Testing Guidelines
-
-When adding or modifying MCP tools, resources, or prompts:
-1. Always run the test suite before finalizing code changes:
-   `mcp-test --config mcp-test.yaml` or `mcp-test run --suite mcp-suite.yaml`
-2. If creating a new tool or handler, perform a zero-config probe:
-   `mcp-test try --server-command "<your-server-command>"`
-3. Prefer declarative cases in `mcp-suite.yaml` for cross-language contract checks.
-4. Verify schema assertions and latency thresholds pass without warnings.
+```bash
+pip install "mcp-test-harness>=3.0.9"
+pip install .   # installs mcp-suite
 ```
 
-### 2. One-click Build & Test Tasks
+### 1. Agent rules
 
-Create `.vscode/tasks.json` so developers can trigger tests with **Ctrl+Shift+B** / **Cmd+Shift+B**:
+See [`.cursorrules`](../.cursorrules) and [`.cursor/rules/mcp-testing.mdc`](../.cursor/rules/mcp-testing.mdc):
+
+1. Prefer `mcp-suite run --suite mcp-suite.yaml`
+2. Probe new tools with `mcp-test try --server-command "…"` (engine CLI)
+3. Keep contracts in `mcp-suite.yaml` for cross-language reuse
+
+### 2. Tasks (`.vscode/tasks.json`)
 
 ```json
 {
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "MCP: Run Test Suite",
+      "label": "MCP: Run declarative suite",
       "type": "shell",
-      "command": "mcp-test run --suite mcp-suite.yaml",
-      "group": { "kind": "test", "isDefault": true },
-      "presentation": { "echo": true, "reveal": "always", "focus": false, "panel": "shared" },
-      "problemMatcher": []
+      "command": "mcp-suite run --suite mcp-suite.yaml",
+      "group": { "kind": "test", "isDefault": true }
     },
     {
-      "label": "MCP: Zero-Config Probe (mcp-test try)",
+      "label": "MCP: Zero-config probe",
       "type": "shell",
       "command": "mcp-test try --server-command \"python src/server.py\"",
-      "group": "test",
-      "presentation": { "echo": true, "reveal": "always" }
+      "group": "test"
     }
   ]
 }
 ```
 
-### 3. Debug local servers before `.cursor/mcp.json`
-
-Before connecting your MCP server to Cursor (Settings → Features → MCP or `.cursor/mcp.json`), run `mcp-test try` to verify stdio and transport sanity:
+### 3. Before `.cursor/mcp.json`
 
 ```bash
-# 1. Probe the server for stdio cleanliness and protocol compliance
 mcp-test try --server-command "node build/index.js"
-
-# 2. Once passed, add to .cursor/mcp.json:
+mcp-suite run --suite mcp-suite.yaml --server-command "node build/index.js"
 ```
 
-```json
-{
-  "mcpServers": {
-    "my-local-server": {
-      "command": "node",
-      "args": ["build/index.js"]
-    }
-  }
-}
-```
-
-> **Tip:** Running `mcp-test try` before adding your server to Cursor prevents silent stdio pollution crashes (for example `console.log` breaking JSON-RPC framing) inside Cursor IDE.
-
-### 4. Launch configurations
-
-See [`.vscode/launch.json`](../.vscode/launch.json) for debugging an MCP server process under Cursor / VS Code.
+Tutorials: [tutorials/](tutorials/) · Multi-language: [MULTI_LANGUAGE.md](MULTI_LANGUAGE.md)

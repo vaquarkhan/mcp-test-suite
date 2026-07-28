@@ -2,21 +2,7 @@
 
 **Current version (planned):** `4.0.0`
 
-## Status — read this first
-
-| Package | Live? | Why 404? |
-|---------|-------|----------|
-| `mcp-test-harness` (PyPI) | **Yes** | Published from [mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness) |
-| `ghcr.io/vaquarkhan/mcp-test-suite` | **No** | This repo has not pushed its own GHCR image yet |
-| `mcp-test-suite-junit5` (Maven) | **No** | Never uploaded to Central yet |
-| `@mcp-test-suite/jest` (npm) | **No** | Never `npm publish` yet |
-| `McpTestSuite.Xunit` (NuGet) | **No** | Never pushed to nuget.org yet |
-| `adapters/gotest` (Go) | **No** | Needs public GitHub repo + module tag |
-
-The Maven / npm / NuGet / pkg.go.dev URLs below are **future** links. They return **404 until the first successful publish**.  
-To go live: follow **[PUBLISHING.md](PUBLISHING.md)** (Sonatype, npm token, NuGet key, push repo + tags).
-
-### Works today (no registry required)
+## Available now
 
 ```bash
 pip install mcp-test-harness
@@ -35,7 +21,8 @@ cd adapters/jest && npm install && npm run build
 |---------|--------------|------------------------|
 | **Any language / CI** | Docker (local now, GHCR after first publish) | `docker build -t mcp-test-suite:local .` |
 | **Any language** | GitHub Releases (binary) | [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases) → `mcp-test` |
-| **Python** | PyPI (**from mcp-test-harness only**) | `pip install mcp-test-harness` |
+| **Python engine** | PyPI (**mcp-test-harness only**) | `pip install mcp-test-harness` |
+| **Suite connectors** | This repo (not a second engine copy) | `pip install .` after installing the harness |
 | **Java / Spring / Quarkus / Micronaut / Kotlin** | **Maven Central** | `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0` |
 | **Gradle** | Maven Central | same GAV as Maven |
 | **Node / Nest / Express / Fastify** | **npm** | `npm i -D @mcp-test-suite/jest` |
@@ -125,7 +112,7 @@ Install from the **mcp-test-harness** project (canonical PyPI package):
 ```bash
 pip install mcp-test-harness
 mcp-test --version
-mcp-test run --suite mcp-suite.yaml
+mcp-suite run --suite mcp-suite.yaml   # after pip install of this suite / Docker image
 ```
 
 | Site | URL |

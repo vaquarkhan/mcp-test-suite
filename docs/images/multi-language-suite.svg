@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 640" role="img" aria-labelledby="title desc">
+  <title id="title">Multi-language MCP Test Suite</title>
+  <desc id="desc">TypeScript, Java, Kotlin, Go, .NET, Python, and Rust share one mcp-suite.yaml and unlock the full engine: HTML dashboard, JUnit, SARIF, schema, latency, and more.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#083344"/>
+    </linearGradient>
+    <linearGradient id="hub" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0891b2"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="feat" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#020617" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1480" height="640" rx="24" fill="url(#bg)"/>
+  <circle cx="1280" cy="90" r="160" fill="#22d3ee" opacity="0.06"/>
+  <circle cx="160" cy="560" r="140" fill="#818cf8" opacity="0.07"/>
+
+  <text x="740" y="52" text-anchor="middle" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">
+    One suite · every language · full engine power
+  </text>
+  <text x="740" y="86" text-anchor="middle" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="16">
+    HTML dashboard, JUnit, SARIF, schema &amp; latency checks  same outputs Python teams already use
+  </text>
+
+  <!-- Language pills (top row) -->
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" filter="url(#soft)">
+    <rect x="48" y="130" width="150" height="52" rx="14" fill="#1e293b" stroke="#38bdf8"/>
+    <text x="123" y="162" text-anchor="middle" fill="#e0f2fe">TypeScript</text>
+
+    <rect x="218" y="130" width="130" height="52" rx="14" fill="#1e293b" stroke="#f97316"/>
+    <text x="283" y="162" text-anchor="middle" fill="#ffedd5">Java</text>
+
+    <rect x="368" y="130" width="130" height="52" rx="14" fill="#1e293b" stroke="#a78bfa"/>
+    <text x="433" y="162" text-anchor="middle" fill="#ede9fe">Kotlin</text>
+
+    <rect x="518" y="130" width="120" height="52" rx="14" fill="#1e293b" stroke="#22d3ee"/>
+    <text x="578" y="162" text-anchor="middle" fill="#cffafe">Go</text>
+
+    <rect x="658" y="130" width="120" height="52" rx="14" fill="#1e293b" stroke="#60a5fa"/>
+    <text x="718" y="162" text-anchor="middle" fill="#dbeafe">.NET</text>
+
+    <rect x="798" y="130" width="140" height="52" rx="14" fill="#1e293b" stroke="#fbbf24"/>
+    <text x="868" y="162" text-anchor="middle" fill="#fef3c7">Python</text>
+
+    <rect x="958" y="130" width="120" height="52" rx="14" fill="#1e293b" stroke="#fb7185"/>
+    <text x="1018" y="162" text-anchor="middle" fill="#ffe4e6">Rust</text>
+
+    <rect x="1098" y="130" width="140" height="52" rx="14" fill="#1e293b" stroke="#34d399"/>
+    <text x="1168" y="162" text-anchor="middle" fill="#d1fae5">Any CLI</text>
+
+    <rect x="1258" y="130" width="170" height="52" rx="14" fill="#1e293b" stroke="#94a3b8"/>
+    <text x="1343" y="162" text-anchor="middle" fill="#e2e8f0">CI Action</text>
+  </g>
+
+  <!-- Converging lines -->
+  <g stroke="#334155" stroke-width="2" fill="none" opacity="0.9">
+    <path d="M123 182 C123 230, 740 230, 740 268"/>
+    <path d="M283 182 C283 230, 740 230, 740 268"/>
+    <path d="M433 182 C433 230, 740 230, 740 268"/>
+    <path d="M578 182 C578 230, 740 230, 740 268"/>
+    <path d="M718 182 C718 230, 740 230, 740 268"/>
+    <path d="M868 182 C868 230, 740 230, 740 268"/>
+    <path d="M1018 182 C1018 230, 740 230, 740 268"/>
+    <path d="M1168 182 C1168 230, 740 230, 740 268"/>
+    <path d="M1343 182 C1343 230, 740 230, 740 268"/>
+  </g>
+
+  <!-- Hub: mcp-suite.yaml -->
+  <g filter="url(#soft)">
+    <rect x="480" y="268" width="520" height="88" rx="20" fill="url(#hub)"/>
+    <text x="740" y="308" text-anchor="middle" fill="#ecfeff" font-family="Consolas, Menlo, monospace" font-size="26" font-weight="700">mcp-suite.yaml</text>
+    <text x="740" y="338" text-anchor="middle" fill="#a5f3fc" font-family="Segoe UI, Arial, sans-serif" font-size="15">
+      Shared contract · mcp-suite run · native adapters
+    </text>
+  </g>
+
+  <line x1="740" y1="356" x2="740" y2="400" stroke="#64748b" stroke-width="3"/>
+
+  <!-- Engine bar -->
+  <g filter="url(#soft)">
+    <rect x="300" y="400" width="880" height="56" rx="14" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/>
+    <text x="740" y="435" text-anchor="middle" fill="#dbeafe" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">
+      mcp-test-harness (PyPI)  same engine Python teams use today
+    </text>
+  </g>
+
+  <!-- Feature cards -->
+  <g font-family="Segoe UI, Arial, sans-serif" filter="url(#soft)">
+    <rect x="48" y="490" width="210" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="153" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">HTML dashboard</text>
+    <text x="153" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">Interactive report</text>
+    <text x="153" y="582" text-anchor="middle" fill="#86efac" font-size="12">filters · PDF/CSV</text>
+
+    <rect x="278" y="490" width="200" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="378" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">JUnit / JSON</text>
+    <text x="378" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">CI annotations</text>
+    <text x="378" y="582" text-anchor="middle" fill="#86efac" font-size="12">Jenkins · GitLab</text>
+
+    <rect x="498" y="490" width="200" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="598" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">SARIF</text>
+    <text x="598" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">Code Scanning</text>
+    <text x="598" y="582" text-anchor="middle" fill="#86efac" font-size="12">security findings</text>
+
+    <rect x="718" y="490" width="200" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="818" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">Schema &amp; latency</text>
+    <text x="818" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">assert_schema</text>
+    <text x="818" y="582" text-anchor="middle" fill="#86efac" font-size="12">max_latency_ms</text>
+
+    <rect x="938" y="490" width="220" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="1048" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">Conformance</text>
+    <text x="1048" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">levels · try mode</text>
+    <text x="1048" y="582" text-anchor="middle" fill="#86efac" font-size="12">protocol checks</text>
+
+    <rect x="1178" y="490" width="250" height="110" rx="16" fill="#052e16" stroke="#34d399"/>
+    <text x="1303" y="530" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="700">Chaos / security</text>
+    <text x="1303" y="560" text-anchor="middle" fill="#a7f3d0" font-size="13">payload packs</text>
+    <text x="1303" y="582" text-anchor="middle" fill="#86efac" font-size="12">engine extras</text>
+  </g>
+</svg>

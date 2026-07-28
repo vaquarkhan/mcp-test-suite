@@ -17,7 +17,7 @@ spring-boot/
 3. Run:
 
 ```bash
-mcp-test run --suite mcp-suite.yaml \
+mcp-suite run --suite mcp-suite.yaml \
   --server-command "java -jar target/my-mcp-server-0.0.1-SNAPSHOT.jar"
 ```
 

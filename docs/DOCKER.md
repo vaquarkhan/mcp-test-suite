@@ -21,7 +21,7 @@ flowchart TB
   subgraph build["docker build from repo root"]
     DF["Dockerfile"]
   end
-  DF --> B["base: mcp + harness wheel"]
+  DF --> B["base: pip install mcp-test-harness (PyPI) + suite connectors"]
   B --> R["default / runtime: ENTRYPOINT mcp-test"]
   B --> D["--target dev: + pytest, jsonschema, dev extras"]
 ```

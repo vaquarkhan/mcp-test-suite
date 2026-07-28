@@ -1,8 +1,8 @@
 # mcp-suite.yaml — language-agnostic MCP tests
 #
 # Go, Java, TypeScript, and Python developers share this file.
-# Run: mcp-test run --suite mcp-suite.yaml
-#   or: mcp-test --config mcp-test.yaml   (auto-discovers *.suite.yaml)
+# Run from repo root:
+#   mcp-suite run --suite examples/declarative/mcp-suite.yaml
 
 server:
   command: python tests/fixtures/minimal_mcp_server.py

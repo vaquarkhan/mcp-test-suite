@@ -2,7 +2,7 @@
 
 ```bash
 # Dev mode (hot reload) — prefer packaged jar in CI
-mcp-test run --suite mcp-suite.yaml \
+mcp-suite run --suite mcp-suite.yaml \
   --server-command "java -jar target/quarkus-app/quarkus-run.jar"
 ```
 

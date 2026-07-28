@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 420" role="img" aria-labelledby="title desc">
+  <title id="title">Same engine features for every language</title>
+  <desc id="desc">Node, Java, Go, and .NET get the HTML dashboard and the same reports as Python  via mcp-suite.yaml, not by rewriting tests in Python.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#134e4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="420" rx="20" fill="url(#bg)"/>
+
+  <text x="700" y="48" text-anchor="middle" fill="#f0fdfa" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">
+    Correct: dashboard &amp; engine features are not Python-only
+  </text>
+  <text x="700" y="82" text-anchor="middle" fill="#99f6e4" font-family="Segoe UI, Arial, sans-serif" font-size="15">
+    Write mcp-suite.yaml once ’ mcp-suite run ’ same HTML / JUnit / SARIF / schema / latency as the Python engine
+  </text>
+
+  <!-- Wrong vs right -->
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="60" y="120" width="520" height="240" rx="16" fill="#450a0a" stroke="#f87171" stroke-width="2"/>
+    <text x="320" y="160" text-anchor="middle" fill="#fecaca" font-size="18" font-weight="700">Myth</text>
+    <text x="320" y="205" text-anchor="middle" fill="#fecaca" font-size="15">Dashboard / reports only work</text>
+    <text x="320" y="232" text-anchor="middle" fill="#fecaca" font-size="15">if I write Python test_*.py</text>
+    <text x="320" y="290" text-anchor="middle" fill="#fca5a5" font-size="14">False  that was the old story</text>
+    <text x="320" y="320" text-anchor="middle" fill="#fca5a5" font-size="14">when docs looked Python-first</text>
+
+    <rect x="820" y="120" width="520" height="240" rx="16" fill="#052e16" stroke="#34d399" stroke-width="2"/>
+    <text x="1080" y="160" text-anchor="middle" fill="#bbf7d0" font-size="18" font-weight="700">Reality</text>
+    <text x="1080" y="205" text-anchor="middle" fill="#d1fae5" font-size="15">Any language ’ mcp-suite.yaml</text>
+    <text x="1080" y="232" text-anchor="middle" fill="#d1fae5" font-size="15">’ full engine outputs</text>
+    <text x="1080" y="290" text-anchor="middle" fill="#86efac" font-size="14">HTML dashboard · JUnit · SARIF</text>
+    <text x="1080" y="320" text-anchor="middle" fill="#86efac" font-size="14">schema · latency · conformance</text>
+  </g>
+
+  <text x="700" y="240" text-anchor="middle" fill="#5eead4" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700">’</text>
+</svg>

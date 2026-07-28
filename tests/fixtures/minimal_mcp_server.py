@@ -1,17 +1,22 @@
-"""Minimal FastMCP server used by harness dogfood e2e tests."""
+"""Minimal stdio MCP server for Action / CI smoke (FastMCP)."""
 
 from __future__ import annotations
 
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stderr, level=logging.WARNING)
+
 from mcp.server.fastmcp import FastMCP
 
-m = FastMCP("harness-dogfood")
+mcp = FastMCP("mcp-test-suite-smoke")
 
 
-@m.tool()
+@mcp.tool()
 def echo(text: str) -> str:
-    """Echo text back."""
+    """Echo text back to the client."""
     return text
 
 
 if __name__ == "__main__":
-    m.run()
+    mcp.run(transport="stdio")

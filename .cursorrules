@@ -1,8 +1,11 @@
 # MCP Server Testing — Cursor agent rules (mcp-test-suite)
 
+Engine is **mcp-test-harness** from PyPI (not vendored in this repo). This repo owns connectors only.
+
 When adding or modifying MCP tools, resources, or prompts:
-1. Always run tests before finalizing: `mcp-test run --suite mcp-suite.yaml` or `mcp-test --config mcp-test.yaml`
-2. New tools: `mcp-test try --server-command "<command>"` first
+1. Always run tests before finalizing: `mcp-suite run --suite mcp-suite.yaml`
+2. New tools: `mcp-test try --server-command "<command>"` first (engine CLI)
 3. Prefer declarative `mcp-suite.yaml` for cross-language contracts; Python tests for complex flows
 4. No stdout pollution on stdio servers (logs → stderr only)
-5. Green `mcp-test try` required before adding the server to `.cursor/mcp.json`
+5. Green try/suite required before adding the server to `.cursor/mcp.json`
+6. After changing connectors: `pip install -e ".[dev]"` then `pytest tests/ -q` (includes `tests/e2e/`)

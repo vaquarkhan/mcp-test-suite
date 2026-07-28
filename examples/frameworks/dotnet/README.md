@@ -4,7 +4,7 @@ Uses the [`adapters/xunit`](../../../adapters/xunit/) helper.
 
 ```bash
 dotnet build
-mcp-test run --suite mcp-suite.yaml --server-command "dotnet run --project src/McpServer"
+mcp-suite run --suite mcp-suite.yaml --server-command "dotnet run --project src/McpServer"
 # or
 dotnet test
 ```

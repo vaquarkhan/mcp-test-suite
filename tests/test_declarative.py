@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from mcp_test_harness.declarative import (
+from mcp_test_harness.assertions import MCPAssertionError
+from mcp_test_suite.declarative import (
     compile_suite,
     discover_suite_files,
     load_declarative_modules,
@@ -17,7 +18,6 @@ from mcp_test_harness.declarative import (
     _slug,
     _validate_against_named_schema,
 )
-from mcp_test_harness.assertions import MCPAssertionError
 
 
 def test_slug_basic():

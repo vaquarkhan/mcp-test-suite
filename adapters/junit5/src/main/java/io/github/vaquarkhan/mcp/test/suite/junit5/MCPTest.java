@@ -26,6 +26,6 @@ public @interface MCPTest {
 
     String transport() default "stdio";
 
-    /** Binary name or absolute path (default: mcp-test on PATH). */
-    String binary() default "mcp-test";
+    /** Binary name or absolute path (default: mcp-suite on PATH). */
+    String binary() default "mcp-suite";
 }

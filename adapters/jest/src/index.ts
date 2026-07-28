@@ -1,8 +1,8 @@
 /**
- * @mcp-test-suite/jest — thin Node adapter over the mcp-test CLI / binary.
+ * @mcp-test-suite/jest — thin Node adapter over the mcp-suite CLI wrapper.
  *
- * Does not reimplement MCP protocol logic; shells out to the standalone engine
- * (PyInstaller binary, Docker image, or `mcp-test` on PATH).
+ * Does not reimplement MCP protocol logic; shells out to ``mcp-suite``
+ * (install: ``pip install mcp-test-harness`` + this suite package).
  */
 
 import { spawn } from "node:child_process";
@@ -16,7 +16,7 @@ export type MCPClientOptions = {
   /** Optional path to mcp-suite.yaml / mcp-test.yaml */
   suite?: string;
   config?: string;
-  /** Binary name or path (default: mcp-test on PATH) */
+  /** Binary name or path (default: mcp-suite on PATH) */
   binary?: string;
   transport?: "stdio" | "sse" | "http";
   cwd?: string;
@@ -34,7 +34,7 @@ async function runCli(
   args: string[],
   opts: { cwd?: string; binary?: string } = {},
 ): Promise<ToolCallResult> {
-  const binary = opts.binary || process.env.MCP_TEST_BIN || "mcp-test";
+  const binary = opts.binary || process.env.MCP_SUITE_BIN || process.env.MCP_TEST_BIN || "mcp-suite";
   return new Promise((resolve) => {
     const child = spawn(binary, args, {
       cwd: opts.cwd,

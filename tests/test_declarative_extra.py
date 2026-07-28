@@ -12,7 +12,7 @@ import pytest
 import yaml
 
 from mcp_test_harness.assertions import MCPAssertionError
-from mcp_test_harness.declarative import (
+from mcp_test_suite.declarative import (
     _build_case_func,
     _parse_suite,
     _result_payload,
@@ -22,7 +22,7 @@ from mcp_test_harness.declarative import (
     load_declarative_modules,
     load_suite_file,
 )
-from mcp_test_harness.declarative_cli import run_declarative
+from mcp_test_suite.declarative_cli import run_declarative
 
 
 def test_parse_suite_external_schema(tmp_path: Path):
@@ -249,7 +249,7 @@ def test_build_case_latency_budget_exceeded(monkeypatch):
 
     monkeypatch.setattr(time, "monotonic", fake_monotonic)
     monkeypatch.setattr(
-        "mcp_test_harness.declarative._validate_against_named_schema",
+        "mcp_test_suite.declarative._validate_against_named_schema",
         lambda *a, **k: None,
     )
 
@@ -289,7 +289,7 @@ def test_run_declarative_config_systemexit(tmp_path: Path, monkeypatch):
     def boom(_ns):
         raise SystemExit(2)
 
-    with patch("mcp_test_harness.declarative_cli.load_config", boom):
+    with patch("mcp_test_suite.declarative_cli.load_config", boom):
         assert run_declarative(["--suite", str(suite), "--server-command", "x"]) == 2
 
 
@@ -329,7 +329,7 @@ def test_expect_error_from_tool_failure():
 
     async def _run():
         with patch(
-            "mcp_test_harness.declarative.assert_tool_call",
+            "mcp_test_suite.declarative.assert_tool_call",
             new=boom,
         ):
             case = DeclarativeCase(name="e", call="t", expect_error=True)
@@ -344,7 +344,7 @@ def test_tool_failure_propagates_when_not_expect_error():
 
     async def _run():
         with patch(
-            "mcp_test_harness.declarative.assert_tool_call",
+            "mcp_test_suite.declarative.assert_tool_call",
             new=boom,
         ):
             case = DeclarativeCase(name="e", call="t", expect_error=False)

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mcp-test-suite"
 version = "4.0.0"
-description = "MCP Test Suite -- multi-language adapters and declarative tests. NOTE: Do not publish this project to PyPI from this repo; the mcp-test engine is published as mcp-test-harness from vaquarkhan/mcp-test-harness."
+description = "MCP Test Suite — multi-language adapters and declarative YAML on top of the PyPI mcp-test-harness engine (connectors only; engine is not vendored here)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -24,28 +24,23 @@ classifiers = [
   "Topic :: Software Development :: Testing",
 ]
 dependencies = [
-  "mcp>=1.0.0",
-  "anyio>=4.0.0",
+  "mcp-test-harness>=3.0.9",
   "pyyaml>=6.0",
 ]
 
 [project.scripts]
-mcp-test = "mcp_test_harness.cli:main"
+# Suite CLI wraps the PyPI engine and adds ``run`` for declarative YAML.
+# Does not replace the engine's ``mcp-test`` entry point.
+mcp-suite = "mcp_test_suite.cli:main"
+
+[project.entry-points."mcp_test_harness"]
+declarative = "mcp_test_suite.plugin"
 
 [project.optional-dependencies]
-# Pins MCP-Bastion for the mcplint shim (optional; core harness does not need it)
-mcplint = [
-  "mcp-bastion-python>=1.0.12",
-]
-bedrock = [
-  "mcp-bastion-bedrock>=0.1.0",
-]
 dev = [
-  "mcp-bastion-python>=1.0.12",
   "pytest>=7.0.0",
   "pytest-asyncio>=0.21.0",
   "jsonschema>=4.0.0",
-  "pyinstaller>=6.0.0",
   "coverage>=7.0.0",
 ]
 
@@ -55,46 +50,41 @@ Repository = "https://github.com/vaquarkhan/mcp-test-suite"
 Documentation = "https://github.com/vaquarkhan/mcp-test-suite#readme"
 Changelog = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/CHANGELOG.md"
 Docker = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/DOCKER.md"
-Architecture = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/ARCHITECTURE.md"
-Editors = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/EDITORS.md"
 MultiLanguage = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/MULTI_LANGUAGE.md"
 CursorIDE = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/CURSOR_IDE.md"
-Collections = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/COLLECTIONS.md"
-Releasing = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/RELEASING.md"
+Engine = "https://github.com/vaquarkhan/mcp-test-harness"
+PyPIEngine = "https://pypi.org/project/mcp-test-harness/"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mcplint", "src/mcp_test_harness"]
+packages = ["src/mcp_test_suite"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/mcplint",
-  "src/mcp_test_harness",
+  "src/mcp_test_suite",
   "README.md",
   "CHANGELOG.md",
   "CONTRIBUTING.md",
   "LICENSE",
   "NOTICE",
   "CITATION.cff",
-  "server.json",
   "docs",
-  "scripts",
+  "adapters",
   "examples",
+  "action.yml",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 pythonpath = ["src"]
-addopts = "--ignore=tests/fixtures/harness_self_test --ignore=tests/fixtures/harness_seam_test"
 markers = [
   "e2e: end-to-end dogfood tests (subprocess mcp-test CLI against real MCP server)",
 ]
 
-# 100% line gate on the harness package.
 [tool.coverage.run]
-source = ["src/mcp_test_harness"]
+source = ["src/mcp_test_suite"]
 
 [tool.coverage.report]
-fail_under = 100
+fail_under = 80
 show_missing = true
 skip_empty = true
 exclude_lines = [

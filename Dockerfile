@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# OCI image for the mcp-test CLI. Default build is a small runtime; use --target dev to run tests in CI.
+# Suite image: installs mcp-test-harness from PyPI + this repo's connectors.
 # Build:  docker build -t mcp-test-suite:local .
 # Dev:    docker build -t mcp-test-suite:dev --target dev .
 
@@ -13,17 +13,16 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE NOTICE CITATION.cff ./
 COPY src ./src
 
+# Engine from PyPI; connectors (declarative + CLI wrapper) from this build.
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir "mcp-test-harness>=3.0.9" && \
     pip install --no-cache-dir .
 
-# Optional: pytest, jsonschema, PyInstaller, etc. (same as pip install ".[dev]").
-# Run tests: docker run --rm -v ${PWD}:/work -w /work --entrypoint pytest mcp-test-suite:dev tests/ -q
 FROM base AS dev
 RUN pip install --no-cache-dir ".[dev]"
-ENTRYPOINT ["mcp-test"]
+ENTRYPOINT ["mcp-suite"]
 CMD ["--help"]
 
-# Default image: mcp-test only (typical for mounting your repo and running the CLI).
 FROM base AS runtime
-ENTRYPOINT ["mcp-test"]
+ENTRYPOINT ["mcp-suite"]
 CMD ["--help"]

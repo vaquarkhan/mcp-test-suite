@@ -1,0 +1,24 @@
+# Used by tests/e2e — real stdio MCP fixture
+server:
+  command: python tests/fixtures/minimal_mcp_server.py
+  transport: stdio
+
+cases:
+  - name: Echo tool responds
+    call: echo
+    args:
+      text: hello
+    tags: [smoke, e2e]
+
+  - name: Echo latency budget
+    call: echo
+    args:
+      text: ping
+    max_latency_ms: 5000
+    tags: [perf, e2e]
+
+  - name: Unknown tool fails
+    call: __does_not_exist__
+    args: {}
+    expect_error: true
+    tags: [negative, e2e]

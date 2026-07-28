@@ -1,53 +1,50 @@
-# Quick start
+# Quick start (mcp-test-suite)
 
-Minimal path from zero to a first automated MCP server test. For the full reference, see [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md). For **CI and report outputs**, see [CI_AND_REPORTS.md](CI_AND_REPORTS.md).
+Minimal path from zero to a green MCP suite. Engine deep-dives live in [mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness).
 
-## 1. Install
+## 1. Install engine + connectors
 
 ```bash
-pip install mcplint
-# or: pip install "mcp-test-harness"   # if published under that name
+pip install "mcp-test-harness>=3.0.9"
+pip install .                 # from this repo root
+mcp-suite --version
 ```
 
-From this repo in editable mode:
+## 2. Add `mcp-suite.yaml`
+
+```yaml
+server:
+  command: python tests/fixtures/minimal_mcp_server.py
+  transport: stdio
+cases:
+  - name: Echo
+    call: echo
+    args: { text: hello }
+```
+
+(From the suite repo root you can also use [examples/declarative/mcp-suite.yaml](../examples/declarative/mcp-suite.yaml).)
+
+## 3. Run
+
+```bash
+mcp-suite run --suite mcp-suite.yaml
+```
+
+## 4. Pick your language
+
+| Next | Doc |
+|------|-----|
+| Shared YAML only | [tutorials/yaml.md](tutorials/yaml.md) |
+| Node / Java / Go / .NET / Rust / Python | [tutorials/](tutorials/) |
+| Framework copy-paste packs | [examples/frameworks/](../examples/frameworks/) |
+| CI Action | [../action.yml](../action.yml) |
+| Docker | [DOCKER.md](DOCKER.md) |
+
+## 5. Prove it (e2e)
 
 ```bash
 pip install -e ".[dev]"
-mcp-test --version
+pytest tests/e2e/ -q
 ```
 
-## 2. Scaffold a starter (recommended)
-
-In your project root (where you want `tests/` and `mcp-test.yaml`):
-
-```bash
-mcp-test init
-mcp-test init --server-command "python -m your_package.mcp"
-```
-
-This creates a sample test module and config. See `mcp-test init --help` for paths and `--no-config` / `--force`.
-
-## 3. Run the harness
-
-```bash
-mcp-test --server-command "python your_mcp_server.py" tests/
-```
-
-With a config file in the current directory (e.g. after `mcp-test init`):
-
-```bash
-mcp-test
-```
-
-## 4. Next steps
-
-- **Performance checks** (latency budgets, p95, tags like `perf`): [PERFORMANCE.md](PERFORMANCE.md)
-- **Stateless MCP (2026-07-28)** — `mcp-test conformance stateless` + `assert_stateless_throughput`: [TUTORIAL_STATELESS.md](TUTORIAL_STATELESS.md) · [RFC-006](design/RFC-006-stateless-mcp.md)
-- **Other MCP tools** (conformance, LLM evals, benchmarks) vs this harness: [COMPARISON.md](COMPARISON.md)
-- Assertions and fixtures: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
-- Longer walkthrough (stateful): [TUTORIAL.md](TUTORIAL.md)
-- GitHub Action for CI: your repo’s `.github/actions/mcp-test` or the README’s workflow examples
-
-## Related: MCP-Bastion (security)
-
-To **protect** a server in production (not only test it), see [MCP-Bastion](https://github.com/vaquarkhan/MCP-Bastion) — policy-as-code, PII, rate limits, and audit. Test with this harness; run with Bastion in front of untrusted clients.
+These tests drive a **real** stdio MCP fixture through `mcp-suite` and validate every language pack’s `mcp-suite.yaml` parses — so connector breakages fail CI early.

@@ -1,82 +1,39 @@
-# Architecture (visual)
+# Architecture (mcp-test-suite)
 
-This page is a **one-screen mental model** of how MCP Test Harness runs: config → discovery → scheduling → per-case execution over a real MCP **session** (stdio, SSE, or streamable HTTP).
+This repo is a **connector layer**. Execution internals live in **mcp-test-harness** (PyPI).
 
-## End-to-end flow
-
-```mermaid
-flowchart LR
-  CLI["mcp-test CLI\n(cli.py)"]
-  CFG["HarnessConfig\n(config.py)"]
-  DISC["Test discovery\n(discovery.py)"]
-  SCH["Scheduler\n(sequential / parallel)\n(scheduler.py)"]
-  LCM["Server lifecycle\n(lifecycle.py)"]
-  TR["Transport\n(transport.py)"]
-  EX["Case executor\n(executor.py)"]
-  TST["Test function\n+ fixtures"]
-  CLI --> CFG --> DISC --> SCH
-  SCH --> LCM
-  LCM --> TR
-  SCH --> EX
-  EX --> TST
-  LCM -->|"MCP session"| TST
-```
-
-- **One server per sequential run**, or **one server per worker** in parallel (tests from the same file stay on one worker; see [DECISIONS.md](DECISIONS.md)).
-- **Schema checks** (optional) run right after connect via `scheduler` → [schema.py](../src/mcp_test_harness/schema.py).
-
-## Dual mode: stateful session vs stateless HTTP
+## Mental model
 
 ```mermaid
 flowchart TB
-  subgraph stateful [Stateful — existing]
-    LCM2[lifecycle.py initialize]
-    SES[MCP ClientSession]
-    AT1[assert_throughput session]
-    TRY[mcp-test try RFC-002]
-    LCM2 --> SES --> AT1
-    LCM2 --> TRY
-  end
-  subgraph stateless [Stateless — SEP-2575]
-    PAY[stateless/payloads.py _meta + headers]
-    CONF[conformance.py adversarial gate]
-    THR[throughput.py URL POST load]
-    CLI2[mcp-test conformance stateless]
-    PAY --> CONF
-    PAY --> THR
-    CONF --> CLI2
-  end
+  AD["Language adapters\nJest / JUnit / Go / xUnit"]
+  YAML["mcp-suite.yaml"]
+  SUITE["mcp-suite CLI\n+ declarative plugin"]
+  PYPI["mcp-test-harness\nPyPI engine"]
+  SRV["Your MCP server"]
+  AD --> SUITE
+  YAML --> SUITE
+  SUITE --> PYPI
+  PYPI --> SRV
 ```
 
-Stateless code lives under `src/mcp_test_harness/stateless/` and does **not** replace lifecycle/transport for stdio or session HTTP. See [RFC-006](design/RFC-006-stateless-mcp.md), [TUTORIAL_STATELESS.md](TUTORIAL_STATELESS.md), and [`stateless-dual-mode.svg`](../images/stateless-dual-mode.svg).
+PNG: [images/architecture-suite.jpg](images/architecture-suite.jpg)
 
-## Data path (MCP)
+## What lives where
 
-```mermaid
-sequenceDiagram
-  participant T as mcp-test
-  participant L as Lifecycle
-  participant Tr as Transport
-  participant S as MCP session
-  participant M as test / assertions
-  T->>L: start server, connect
-  L->>Tr: stdio / SSE / HTTP
-  Tr->>S: ClientSession
-  L->>M: inject mcp_server / session fixture
-  M->>S: list_tools, call_tool, read_resource, …
-  M->>T: case result, reports
-  L-->>T: shutdown, teardown
+| Concern | Repo |
+|---------|------|
+| Transports, assertions, scheduler, reports, chaos | **mcp-test-harness** |
+| Declarative YAML compiler, `mcp-suite` CLI, adapters, Action, suite Docker | **mcp-test-suite** (here) |
+
+Engine deep-dive (discovery → scheduler → session): see the [harness Architecture docs](https://github.com/vaquarkhan/mcp-test-harness/blob/main/docs/ARCHITECTURE.md) after you install from PyPI.
+
+## Upgrades
+
+```bash
+pip install -U "mcp-test-harness>=3.0.9"
+# rebuild suite image to pick up a new engine pin
+docker build -t mcp-test-suite:local .
 ```
 
-## Where to go next
-
-| Topic | Document |
-|--------|----------|
-| Config keys and CLI | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) |
-| Assert helpers and snapshots | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) |
-| Ecosystem (Inspector, conformance, evals) | [COMPARISON.md](COMPARISON.md) |
-| Stateless SEP-2575 | [TUTORIAL_STATELESS.md](TUTORIAL_STATELESS.md) · [RFC-006](design/RFC-006-stateless-mcp.md) |
-| Docker / OCI | [DOCKER.md](DOCKER.md) |
-| **Editors (VS Code, Cursor)** | [EDITORS.md](EDITORS.md) |
-
-**Related:** [IMPLEMENTATION_CHECKLIST.md](IMPLEMENTATION_CHECKLIST.md) maps features to **source files** for maintainers.
+No engine source is copied into this tree — see [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md).

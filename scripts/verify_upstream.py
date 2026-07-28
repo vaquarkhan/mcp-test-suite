@@ -1,26 +1,23 @@
 #!/usr/bin/env python3
-"""End-to-end smoke check: upstream packages import after automatic install."""
+"""Smoke: suite connectors + PyPI mcp-test-harness import cleanly."""
 
 from __future__ import annotations
 
+import importlib.metadata as metadata
 import sys
 
 
 def main() -> int:
     try:
-        import mcp_bastion  # noqa: F401
+        import mcp_test_harness  # noqa: F401
+        import mcp_test_suite  # noqa: F401
+        from mcp_test_suite.declarative import load_suite_file  # noqa: F401
     except ImportError as e:
-        print("FAIL: mcp_bastion import:", e, file=sys.stderr)
+        print("FAIL: import:", e, file=sys.stderr)
         return 1
 
-    from mcplint import bastion_version, bedrock_version
-
-    print("OK  mcp-bastion-python", bastion_version())
-    bv = bedrock_version()
-    if bv:
-        print("OK  mcp-bastion-bedrock", bv)
-    else:
-        print("SKIP mcp-bastion-bedrock (install extra: pip install -e .[bedrock])")
+    print("OK  mcp-test-harness", metadata.version("mcp-test-harness"))
+    print("OK  mcp-test-suite", metadata.version("mcp-test-suite"))
     return 0
 
 
