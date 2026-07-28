@@ -18,7 +18,7 @@ Use the **Jest adapter** (`@vaquarkhan/mcp-test-suite-jest`) or CLI-only `mcp-su
 ## Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 

@@ -46,16 +46,27 @@ testImplementation("io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0")
 
 Or download `mcp-test-suite-junit5-4.0.0.jar` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0).
 
-Engine: `pip install mcp-test-harness` + `mcp-suite` on PATH ([DOWNLOADS.md](../../docs/DOWNLOADS.md)).
+**Python engine required:** install `mcp-test-harness` + this repo’s `mcp-suite` CLI and keep them on `PATH` ([DOWNLOADS.md](../../docs/DOWNLOADS.md)). Override with `@MCPTest(binary = "...")` if needed. Missing binary errors include an install hint.
 
 ## Usage
 
 ```java
-@MCPTest(serverCommand = "java -jar target/spring-ai-server.jar", suite = "mcp-suite.yaml")
+@MCPTest(
+    serverCommand = "java -jar target/spring-ai-server.jar",
+    suite = "mcp-suite.yaml",
+    binary = "mcp-suite",
+    timeoutMinutes = 10
+)
 public class WeatherToolTest {
     @Test
     public void suitePasses(MCPConnection mcp) {
-        assertTrue(mcp.runSuite().passed());
+        mcp.runSuite().assertPassed();
+    }
+
+    @Test
+    public void echoCases(MCPConnection mcp) {
+        // Filters suite cases by name (-k), does not invoke a raw tool RPC.
+        mcp.call("echo").assertPassed();
     }
 }
 ```

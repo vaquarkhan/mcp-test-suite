@@ -24,10 +24,13 @@ classifiers = [
   "Topic :: Software Development :: Testing",
 ]
 dependencies = [
-  "mcp-test-harness>=3.0.9",
-  # Harness 3.0.9 stdio client is incompatible with mcp 2.0 (JSONRPCMessage UnionType).
+  # Pin major to limit breakage from harness private APIs used by mcp-suite run.
+  "mcp-test-harness>=3.0.9,<4",
+  # Harness 3.0.9 declares mcp>=1.0.0 but its stdio client breaks on mcp 2.0
+  # (JSONRPCMessage UnionType). Cap here until the engine supports mcp 2.x.
   "mcp>=1.2,<2",
   "pyyaml>=6.0",
+  "jsonschema>=4.0.0",
 ]
 
 [project.scripts]
@@ -42,7 +45,6 @@ declarative = "mcp_test_suite.plugin"
 dev = [
   "pytest>=7.0.0",
   "pytest-asyncio>=0.21.0",
-  "jsonschema>=4.0.0",
   "coverage>=7.0.0",
 ]
 

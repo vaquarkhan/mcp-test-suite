@@ -25,6 +25,13 @@ def test_cli_run_delegates_to_declarative(monkeypatch):
     assert called["argv"] == ["--suite", "x.yaml"]
 
 
+def test_cli_version_prints_suite_and_engine(capsys):
+    assert cli.main(["--version"]) == 0
+    out = capsys.readouterr().out
+    assert "mcp-test-suite 4.0.0" in out
+    assert "engine mcp-test" in out
+
+
 def test_cli_delegates_other_commands_to_harness(monkeypatch):
     called = {}
 
@@ -33,7 +40,7 @@ def test_cli_delegates_other_commands_to_harness(monkeypatch):
         return 0
 
     monkeypatch.setattr("mcp_test_harness.cli.main", fake_harness_main)
-    assert cli.main(["--version"]) == 0
+    assert cli.main(["try", "--help"]) == 0
     assert called["ok"] is True
 
 

@@ -6,7 +6,7 @@
 ## Run connector tests
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install -e ".[dev]"
 python -m pytest tests/ -q
 # includes tests/e2e/ (real mcp-suite → MCP fixture)

@@ -35,6 +35,10 @@ mcp-suite run --suite mcp-suite.yaml \
 
 Report formats are produced by the **engine** (`mcp-test-harness`). See that project’s docs for full reporter options.
 
+## Trust / safety
+
+The Action runs `server-command` and any `server.command` from the suite file as a real process. Only use trusted suite YAML and workflow inputs — treat them like executable config.
+
 ## This repo’s CI
 
 [`.github/workflows/validate.yml`](../.github/workflows/validate.yml) runs connector unit tests + `tests/e2e/` so language packs and `mcp-suite` breakages fail early.

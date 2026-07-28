@@ -1,6 +1,6 @@
 package io.github.vaquarkhan.mcp.test.suite.junit5;
 
-/** Result of an mcp-test CLI invocation. */
+/** Result of an mcp-suite / mcp-test CLI invocation. */
 public final class MCPCallResult {
     private final int exitCode;
     private final String stdout;
@@ -19,4 +19,12 @@ public final class MCPCallResult {
     public String stderr() { return stderr; }
     public long latency() { return latencyMs; }
     public boolean passed() { return exitCode == 0; }
+
+    /** Fail the calling test if the CLI exited non-zero. */
+    public void assertPassed() {
+        if (!passed()) {
+            throw new AssertionError(
+                    "mcp-suite failed (exit " + exitCode + "):\n" + stderr + "\n" + stdout);
+        }
+    }
 }

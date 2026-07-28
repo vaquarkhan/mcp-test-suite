@@ -12,7 +12,7 @@ Example pack: [examples/frameworks/typescript/nestjs/](../../examples/frameworks
 ## 1. Install engine + suite
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 

@@ -15,7 +15,7 @@ COPY src ./src
 
 # Engine from PyPI; connectors (declarative + CLI wrapper) from this build.
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir "mcp-test-harness>=3.0.9" && \
+    pip install --no-cache-dir "mcp-test-harness>=3.0.9,<4" && \
     pip install --no-cache-dir .
 
 FROM base AS dev

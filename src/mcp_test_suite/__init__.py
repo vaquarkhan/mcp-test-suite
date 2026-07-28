@@ -1,4 +1,4 @@
-"""MCP Test Suite — connectors and declarative YAML on top of mcp-test-harness."""
+"""mcp-test-suite — declarative YAML connectors over mcp-test-harness."""
 
 from __future__ import annotations
 

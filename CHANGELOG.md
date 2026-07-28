@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Fixed
+
+- **CLI:** `mcp-suite --version` reports suite + engine versions; help/version exit 0; clear install hints when the engine is missing.
+- **Declarative soundness:** `expect_error` accepts only tool/protocol failures (not infra or random exceptions); supports `{code, message_matches}` / `error_matches`; latency composes with value/schema/error on one case.
+- **Discovery:** suite file walk prunes `node_modules`, `.git`, venvs, `target`, etc.
+- **Packaging:** pin `mcp-test-harness>=3.0.9,<4`; `jsonschema` is a core dependency; document `mcp<2` constraint.
+- **JUnit5:** `call(tool)` filters suite with `-k`; `assertPassed()`; `@MCPTest(timeoutMinutes)`; Windows binary resolution; missing-CLI install hint.
+- **Docs:** suite-file trust/safety notes; adapter Python engine requirement.
+
+### Changed
+
+- Filter helpers live in suite-owned `filters.py` (no harness private `_matches_*` imports).
+- Engine scheduler accessed only via `mcp_test_suite.engine.run_harness` (version-gated).
+
 ## [4.0.0] - 2026-07-28
 
 ### Added

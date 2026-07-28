@@ -14,7 +14,7 @@ Each tutorial uses the same **`mcp-suite.yaml`** contract and the PyPI engine (`
 ## Prereq (all tutorials)
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-suite --version
 ```

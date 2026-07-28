@@ -11,7 +11,7 @@ Example pack: [examples/frameworks/python/fastmcp/](../../examples/frameworks/py
 ## 1. Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 pip install "mcp>=1.2,<2"   # FastMCP lives in the mcp SDK (1.x)
 ```

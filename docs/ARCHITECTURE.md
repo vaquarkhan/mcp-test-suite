@@ -31,7 +31,7 @@ Engine deep-dive (discovery → scheduler → session): see the [harness Archite
 ## Upgrades
 
 ```bash
-pip install -U "mcp-test-harness>=3.0.9"
+pip install -U "mcp-test-harness>=3.0.9,<4"
 # rebuild suite image to pick up a new engine pin
 docker build -t mcp-test-suite:local .
 ```

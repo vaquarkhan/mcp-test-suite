@@ -72,8 +72,6 @@ Desktop.ini
 
 # Cursor / other agent UI (local only)
 .cursor/*
-!.cursor/skills/
-!.cursor/skills/**
 
 # Local env and secrets
 .env

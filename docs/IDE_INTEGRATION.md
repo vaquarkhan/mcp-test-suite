@@ -14,7 +14,7 @@ Use **mcp-test-suite** from any editor or AI assistant that supports MCP. The wo
 ## Prereq (all IDEs)
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-test --version && mcp-suite --version
 ```
@@ -57,20 +57,6 @@ mcp-test --version && mcp-suite --version
 | **[Cline / Roo Code](https://github.com/cline/cline)** (VS Code) | Extension MCP settings | `.clinerules` / `.roo/` |
 
 Traditional editor tips (snippets, extensions, terminal): [EDITORS.md](EDITORS.md).
-
----
-
-## Cursor skills
-
-Project skills in [`.cursor/skills/`](../.cursor/skills/):
-
-| Skill | When to use |
-|-------|-------------|
-| [`mcp-test-suite`](../.cursor/skills/mcp-test-suite/SKILL.md) | Install engine, run try/suite, IDE MCP wiring |
-| [`mcp-suite-yaml`](../.cursor/skills/mcp-suite-yaml/SKILL.md) | Author declarative suite YAML |
-| [`mcp-adapter-install`](../.cursor/skills/mcp-adapter-install/SKILL.md) | Maven / npm / NuGet / Go adapter installs |
-
-Also: [`.cursorrules`](../.cursorrules) · [AGENTS.md](../AGENTS.md)
 
 ---
 

@@ -295,7 +295,7 @@ def test_run_declarative_config_systemexit(tmp_path: Path, monkeypatch):
     def boom(_ns):
         raise SystemExit(2)
 
-    with patch("mcp_test_suite.declarative_cli.load_config", boom):
+    with patch("mcp_test_harness.config.load_config", boom):
         assert run_declarative(["--suite", str(suite), "--server-command", "x"]) == 2
 
 
@@ -322,7 +322,7 @@ def test_run_declarative_list(tmp_path: Path, monkeypatch):
     async def fake_run(*args, **kwargs):
         return 0
 
-    with patch("mcp_test_harness.cli._run_harness", fake_run):
+    with patch("mcp_test_suite.engine.run_harness", fake_run):
         code = run_declarative(
             ["--suite", str(suite), "--config", str(cfg), "--list"]
         )
@@ -358,3 +358,105 @@ def test_tool_failure_propagates_when_not_expect_error():
                 await _build_case_func(case, {})(object())
 
     asyncio.run(_run())
+
+
+def test_expect_error_message_matches():
+    from mcp_test_suite.declarative import ExpectErrorSpec
+
+    async def boom(*args, **kwargs):
+        raise MCPAssertionError("Unknown tool: nope")
+
+    case = DeclarativeCase(
+        name="e",
+        call="t",
+        expect_error=True,
+        expect_error_spec=ExpectErrorSpec(message_matches="Unknown tool"),
+    )
+
+    async def _run():
+        with patch("mcp_test_suite.declarative.assert_tool_call", new=boom):
+            await _build_case_func(case, {})(object())
+
+    asyncio.run(_run())
+
+
+def test_expect_error_message_mismatch_fails():
+    from mcp_test_suite.declarative import ExpectErrorSpec
+
+    async def boom(*args, **kwargs):
+        raise MCPAssertionError("connection reset")
+
+    case = DeclarativeCase(
+        name="e",
+        call="t",
+        expect_error=True,
+        expect_error_spec=ExpectErrorSpec(message_matches="Unknown tool"),
+    )
+
+    async def _run():
+        with patch("mcp_test_suite.declarative.assert_tool_call", new=boom):
+            with pytest.raises(MCPAssertionError, match="did not match expect_error"):
+                await _build_case_func(case, {})(object())
+
+    asyncio.run(_run())
+
+
+def test_expect_error_infra_not_swallowed():
+    async def boom(*args, **kwargs):
+        raise ConnectionError("server gone")
+
+    case = DeclarativeCase(name="e", call="t", expect_error=True)
+
+    async def _run():
+        with patch("mcp_test_suite.declarative.assert_tool_call", new=boom):
+            with pytest.raises(ConnectionError, match="server gone"):
+                await _build_case_func(case, {})(object())
+
+    asyncio.run(_run())
+
+
+def test_parse_expect_error_dict_and_alias():
+    from mcp_test_suite.declarative import _parse_expect_error
+
+    enabled, spec = _parse_expect_error({"code": -32601, "message_matches": "SCOPE"})
+    assert enabled is True
+    assert spec is not None
+    assert spec.code == -32601
+    assert spec.message_matches == "SCOPE"
+
+    enabled, spec = _parse_expect_error(False, error_matches="boom")
+    assert enabled is True
+    assert spec is not None
+    assert spec.message_matches == "boom"
+
+
+def test_expect_error_rejects_random_exceptions():
+    async def boom(*args, **kwargs):
+        raise RuntimeError("harness bug")
+
+    case = DeclarativeCase(name="e", call="t", expect_error=True)
+
+    async def _run():
+        with patch("mcp_test_suite.declarative.assert_tool_call", new=boom):
+            with pytest.raises(RuntimeError, match="harness bug"):
+                await _build_case_func(case, {})(object())
+
+    asyncio.run(_run())
+
+
+def test_engine_require_compatible_harness():
+    from mcp_test_suite.engine import require_compatible_harness
+
+    ver = require_compatible_harness()
+    assert ver.startswith("3.")
+
+
+def test_discover_skips_node_modules(tmp_path: Path):
+    (tmp_path / "mcp-suite.yaml").write_text("cases: []\n", encoding="utf-8")
+    nested = tmp_path / "node_modules" / "pkg"
+    nested.mkdir(parents=True)
+    (nested / "evil.suite.yaml").write_text("cases: []\n", encoding="utf-8")
+    found = discover_suite_files([tmp_path])
+    names = {p.name for p in found}
+    assert "mcp-suite.yaml" in names
+    assert "evil.suite.yaml" not in names

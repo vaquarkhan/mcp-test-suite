@@ -16,7 +16,7 @@ Thanks for helping improve **MCP Test Suite** (multi-language connectors over Py
 ## Develop & test
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install -e ".[dev]"
 python -m pytest tests/ -q
 coverage run -m pytest tests/ -q

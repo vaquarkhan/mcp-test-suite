@@ -13,7 +13,7 @@ Write contracts once in `mcp-suite.yaml`. Every adapter and CI job reuses this f
 ## 1. Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-suite --version
 ```
@@ -42,6 +42,11 @@ cases:
     args: {}
     expect_error: true
     tags: [negative]
+
+  # Prefer a specific error when you can (avoids false greens):
+  # expect_error: { message_matches: "Unknown tool" }
+  # expect_error: { code: -32601 }
+  # error_matches: "Unknown tool"
 ```
 
 ## 3. Run
@@ -77,9 +82,14 @@ mcp-test try --server-command "node dist/server.js"
 | `expected` | Expected payload |
 | `assert_schema` | Named schema under `schemas:` |
 | `max_latency_ms` | Latency budget |
-| `expect_error` | Tool/protocol must fail |
+| `expect_error` | Tool/protocol must fail (`true`, a substring, or `{code, message_matches}`) |
+| `error_matches` | Alias for `expect_error.message_matches` |
 | `resource` / `prompt` | Resource read or prompt get |
 | `tags` | Filter / CI grouping |
+
+### Trust / safety
+
+`server.command` in `mcp-suite.yaml` is executed as a process (same for the GitHub Action `server-command` input). Treat suite files like code: only run trusted/reviewed YAML.
 
 ## Next
 

@@ -16,7 +16,7 @@ Cursor is an AI-first editor with native MCP support. Use **mcp-test-suite** con
 ### Prereq
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 

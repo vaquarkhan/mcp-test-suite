@@ -21,7 +21,7 @@ Install:
 pip install mcp-test-harness
 
 # Suite connectors (declarative `mcp-test run` / `mcp-suite`) from this repo
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install .
 
 # Or pull the suite image (engine + connectors)

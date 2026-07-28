@@ -10,7 +10,7 @@
 
 | Registry | Package | Version |
 |----------|---------|---------|
-| **PyPI** | [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/) | ≥3.0.9 |
+| **PyPI** | [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/) | ≥3.0.9,<4 |
 | **Maven (GitHub Packages)** | [`io.github.vaquarkhan:mcp-test-suite-junit5`](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) | 4.0.0 |
 | **npm (GitHub Packages)** | [`@vaquarkhan/mcp-test-suite-jest`](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest) | 4.0.0 |
 | **NuGet (GitHub Packages)** | [`McpTestSuite.Xunit`](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) | 4.0.0 |
@@ -36,15 +36,20 @@ GitHub Packages installs need a PAT with `read:packages`. Direct [Release](https
 ## 0. Engine (required for every language)
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 mcp-test --version
 
 # Declarative CLI from this repo
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-suite --version
+# → mcp-test-suite 4.0.0 (engine mcp-test 3.0.9)
 ```
 
 PyPI: https://pypi.org/project/mcp-test-harness/
+
+### MCP SDK note (`mcp` package)
+
+`mcp-test-suite` currently requires **`mcp>=1.2,<2`**. Harness 3.0.9’s stdio client is incompatible with **mcp 2.x** (`JSONRPCMessage` / `UnionType`). If another project pulled in mcp 2.x, use a separate venv for MCP testing until the engine supports 2.x.
 
 ---
 

@@ -8,7 +8,8 @@ from pathlib import Path
 def test_pyproject_depends_on_harness_pypi() -> None:
     root = Path(__file__).resolve().parents[1]
     text = (root / "pyproject.toml").read_text(encoding="utf-8")
-    assert "mcp-test-harness>=" in text.replace(" ", "")
+    assert "mcp-test-harness>=3.0.9,<4" in text.replace(" ", "").replace('"', "")
+    assert "jsonschema>=" in text.replace(" ", "")
     assert 'packages = ["src/mcp_test_suite"]' in text
     assert "src/mcp_test_harness" not in text
 

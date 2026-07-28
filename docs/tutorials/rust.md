@@ -11,7 +11,7 @@ Example pack: [examples/frameworks/rust/](../../examples/frameworks/rust/)
 ## 1. Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-suite --version
 ```

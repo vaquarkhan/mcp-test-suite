@@ -20,9 +20,11 @@ Use **JUnit 5** + `mcp-suite.yaml` to test Java MCP servers. Shared engine repor
 ## Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
+
+The JUnit adapter shells out to `mcp-suite` — Python + the engine must be on `PATH` (or set `@MCPTest(binary = "...")`).
 
 Maven: `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0` — [package page](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511)
 

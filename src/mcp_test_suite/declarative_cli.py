@@ -8,10 +8,15 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-from mcp_test_harness.config import load_config
-
 from mcp_test_suite.declarative import discover_suite_files, load_suite_file
 from mcp_test_suite.runtime import RUNTIME, reset_runtime
+
+_INSTALL_HINT = (
+    "Install the engine and suite CLI:\n"
+    '  pip install "mcp-test-harness>=3.0.9,<4"\n'
+    '  pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"\n'
+    "Then ensure `mcp-suite` is on PATH."
+)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -64,6 +69,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def run_declarative(argv: list[str] | None = None) -> int:
     """Entry point for ``mcp-suite run`` / ``mcp-test run``."""
+    try:
+        from mcp_test_harness.config import load_config
+    except ImportError as exc:
+        print(f"mcp-test-harness is required but not importable: {exc}", file=sys.stderr)
+        print(_INSTALL_HINT, file=sys.stderr)
+        return 1
+
     args = _build_parser().parse_args(argv)
     reset_runtime()
 
@@ -132,13 +144,21 @@ def run_declarative(argv: list[str] | None = None) -> int:
     RUNTIME.filter_name = args.filter_name
     RUNTIME.filter_marker = args.filter_marker
 
-    from mcp_test_harness.cli import _run_harness
+    try:
+        from mcp_test_suite.engine import run_harness
+    except Exception as exc:
+        print(f"Cannot load mcp-test-harness engine bridge: {exc}", file=sys.stderr)
+        print(_INSTALL_HINT, file=sys.stderr)
+        return 1
 
     try:
         return asyncio.run(
-            _run_harness(
+            run_harness(
                 config, list_only=bool(args.list), fail_fast=False, last_failed=False
             )
         )
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     finally:
         reset_runtime()

@@ -5,7 +5,7 @@ Guidance for AI coding agents (Cursor, Kiro, Codex, Copilot, Windsurf, Gemini, C
 ## Install
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 
@@ -27,4 +27,3 @@ pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 - [docs/IDE_INTEGRATION.md](docs/IDE_INTEGRATION.md) — Cursor, Kiro, Google, ChatGPT, VS Code, Windsurf, JetBrains, …
 - [docs/DOWNLOADS.md](docs/DOWNLOADS.md) — package install links
 - [docs/tutorials/](docs/tutorials/) — per-language walkthroughs
-- [`.cursor/skills/`](.cursor/skills/) — Cursor agent skills (`mcp-test-suite`, `mcp-suite-yaml`, `mcp-adapter-install`)

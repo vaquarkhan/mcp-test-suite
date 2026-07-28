@@ -132,7 +132,7 @@ runs:
         set -euo pipefail
         python -m pip install --upgrade pip
         if [ "$HARNESS_VERSION" = "latest" ]; then
-          python -m pip install "mcp-test-harness>=3.0.9"
+          python -m pip install "mcp-test-harness>=3.0.9,<4"
         else
           python -m pip install "mcp-test-harness==$HARNESS_VERSION"
         fi

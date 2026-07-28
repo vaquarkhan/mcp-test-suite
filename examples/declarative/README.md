@@ -27,11 +27,16 @@ mcp-test run
 | `assert_schema` | Named schema under `schemas:` (JSON Schema) |
 | `max_latency_ms` | Fail if call exceeds this latency |
 | `validate_input_schema` | Validate args against the tool's `inputSchema` |
-| `expect_error` | Assert the call fails |
+| `expect_error` | Assert the call fails (`true`, a substring, or `{code, message_matches}`) |
+| `error_matches` | Substring that must appear in the error message |
 | `resource` | Read a resource URI instead of calling a tool |
 | `prompt` | Get a prompt instead of calling a tool |
 | `tags` | Filter with `mcp-test run -m smoke` |
 | `timeout` | Per-case timeout (seconds) |
+
+## Trust / safety
+
+`server.command` (and CLI `--server-command`) launches a real process. Only run suite files you trust — especially in CI Actions that accept a suite path from the workflow.
 
 ## Why declarative?
 

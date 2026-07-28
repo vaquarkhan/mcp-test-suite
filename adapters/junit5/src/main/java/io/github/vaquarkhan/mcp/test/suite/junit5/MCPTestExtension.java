@@ -26,6 +26,7 @@ public final class MCPTestExtension implements ParameterResolver {
                 ann.serverCommand(),
                 ann.suite(),
                 ann.config(),
-                ann.transport());
+                ann.transport(),
+                ann.timeoutMinutes());
     }
 }

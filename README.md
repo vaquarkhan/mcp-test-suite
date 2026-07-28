@@ -13,8 +13,7 @@
 [Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
 [.NET / NuGet](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) ·
 [Release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
-[Install guide](docs/DOWNLOADS.md) ·
-[Skills](.cursor/skills/)
+[Install guide](docs/DOWNLOADS.md)
 
 [![Release](https://img.shields.io/github/v/release/vaquarkhan/mcp-test-suite?label=adapters&display_name=tag)](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
 [![PyPI engine](https://img.shields.io/pypi/v/mcp-test-harness?label=engine)](https://pypi.org/project/mcp-test-harness/)
@@ -37,7 +36,7 @@ Full guide: **[docs/DOWNLOADS.md](docs/DOWNLOADS.md)** · Release assets: **[Rel
 ### Python engine + `mcp-suite` CLI
 
 ```bash
-pip install "mcp-test-harness>=3.0.9"
+pip install "mcp-test-harness>=3.0.9,<4"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-test --version && mcp-suite --version
 ```
@@ -156,8 +155,6 @@ Full index: [docs/tutorials/README.md](docs/tutorials/README.md)
 Works with **Cursor**, **Kiro**, **Google Antigravity**, **Gemini Code Assist**, **ChatGPT**, **OpenAI Codex**, **VS Code**, **GitHub Copilot**, **Windsurf**, **JetBrains**, **Zed**, and more.
 
 [docs/IDE_INTEGRATION.md](docs/IDE_INTEGRATION.md) · [Cursor](docs/CURSOR_IDE.md) · [`.cursorrules`](.cursorrules) · [AGENTS.md](AGENTS.md)
-
-**Cursor skills** (project): [`.cursor/skills/`](.cursor/skills/) — `mcp-test-suite`, `mcp-suite-yaml`, `mcp-adapter-install`
 
 ## Docs
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 import time
 from dataclasses import dataclass, field
@@ -20,10 +21,11 @@ import yaml
 
 from mcp_test_harness.assertions import (
     MCPAssertionError,
-    assert_latency,
     assert_tool_call,
 )
 from mcp_test_harness.discovery import HarnessCase, HarnessModule
+
+from mcp_test_suite.filters import filter_cases
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,49 @@ _SUITE_FILE_NAMES = (
     "mcp-test.suite.yml",
 )
 _SUITE_GLOBS = ("*.suite.yaml", "*.suite.yml", "*.suite.json")
+
+# Prune noisy / foreign trees during suite discovery (D1).
+_SKIP_DIR_NAMES = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        ".venv",
+        "venv",
+        "node_modules",
+        "__pycache__",
+        ".tox",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "dist",
+        "build",
+        "target",
+        "vendor",
+        ".idea",
+        ".cursor",
+        ".vscode",
+        "coverage",
+        "htmlcov",
+    }
+)
+
+# Infra failures must not satisfy expect_error (false green).
+_INFRA_ERROR_TYPES = (
+    ConnectionError,
+    TimeoutError,
+    OSError,
+    BrokenPipeError,
+    InterruptedError,
+)
+
+
+@dataclass
+class ExpectErrorSpec:
+    """Optional constraints for a negative (expect_error) case."""
+
+    code: int | None = None
+    message_matches: str | None = None
 
 
 @dataclass
@@ -49,6 +94,7 @@ class DeclarativeCase:
     max_latency_ms: float | None = None
     validate_input_schema: bool = False
     expect_error: bool = False
+    expect_error_spec: ExpectErrorSpec | None = None
     tags: list[str] = field(default_factory=list)
     timeout: float | None = None
     resource: str | None = None
@@ -71,6 +117,40 @@ class DeclarativeSuite:
 def _slug(name: str) -> str:
     slug = re.sub(r"[^0-9a-zA-Z]+", "_", name.strip()).strip("_").lower()
     return slug or "case"
+
+
+def _parse_expect_error(
+    raw: Any,
+    *,
+    error_matches: Any = None,
+) -> tuple[bool, ExpectErrorSpec | None]:
+    """Parse ``expect_error`` / ``error_matches`` into (enabled, optional spec)."""
+    spec: ExpectErrorSpec | None = None
+    enabled = False
+
+    if isinstance(raw, dict):
+        enabled = True
+        code = raw.get("code")
+        msg = raw.get("message_matches") or raw.get("error_matches") or raw.get("matches")
+        spec = ExpectErrorSpec(
+            code=int(code) if code is not None else None,
+            message_matches=str(msg) if msg is not None else None,
+        )
+    elif isinstance(raw, str):
+        enabled = True
+        spec = ExpectErrorSpec(message_matches=raw)
+    elif raw:
+        enabled = True
+
+    if error_matches is not None and error_matches is not False:
+        enabled = True
+        msg = str(error_matches)
+        if spec is None:
+            spec = ExpectErrorSpec(message_matches=msg)
+        elif spec.message_matches is None:
+            spec = ExpectErrorSpec(code=spec.code, message_matches=msg)
+
+    return enabled, spec
 
 
 def load_suite_file(path: Path) -> DeclarativeSuite:
@@ -108,6 +188,10 @@ def _parse_suite(data: dict[str, Any], path: Path) -> DeclarativeSuite:
         tags = item.get("tags") or []
         if not isinstance(tags, list):
             tags = [str(tags)]
+        expect_error, expect_spec = _parse_expect_error(
+            item.get("expect_error", False),
+            error_matches=item.get("error_matches"),
+        )
         cases.append(
             DeclarativeCase(
                 name=name,
@@ -121,7 +205,8 @@ def _parse_suite(data: dict[str, Any], path: Path) -> DeclarativeSuite:
                     else None
                 ),
                 validate_input_schema=bool(item.get("validate_input_schema", False)),
-                expect_error=bool(item.get("expect_error", False)),
+                expect_error=expect_error,
+                expect_error_spec=expect_spec,
                 tags=[str(t) for t in tags],
                 timeout=float(item["timeout"]) if item.get("timeout") is not None else None,
                 resource=item.get("resource"),
@@ -151,6 +236,27 @@ def _parse_suite(data: dict[str, Any], path: Path) -> DeclarativeSuite:
     )
 
 
+def _should_skip_dir(name: str) -> bool:
+    return name in _SKIP_DIR_NAMES or (name.startswith(".") and name not in (".", ".."))
+
+
+def _iter_suite_candidates(root: Path) -> list[Path]:
+    """Collect suite files under *root*, pruning common vendor/cache dirs."""
+    candidates: list[Path] = []
+    for name in _SUITE_FILE_NAMES:
+        p = root / name
+        if p.is_file():
+            candidates.append(p)
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if not _should_skip_dir(d)]
+        for filename in filenames:
+            lower = filename.lower()
+            if lower.endswith((".suite.yaml", ".suite.yml", ".suite.json")):
+                candidates.append(Path(dirpath) / filename)
+    return candidates
+
+
 def discover_suite_files(paths: list[Path] | None = None) -> list[Path]:
     """Find declarative suite files under *paths* (default: cwd)."""
     roots = paths or [Path.cwd()]
@@ -161,13 +267,7 @@ def discover_suite_files(paths: list[Path] | None = None) -> list[Path]:
         if root.is_file():
             candidates = [root]
         else:
-            candidates = []
-            for name in _SUITE_FILE_NAMES:
-                p = root / name
-                if p.is_file():
-                    candidates.append(p)
-            for pattern in _SUITE_GLOBS:
-                candidates.extend(root.rglob(pattern))
+            candidates = _iter_suite_candidates(root)
         for path in candidates:
             resolved = path.resolve()
             if resolved not in seen and resolved.is_file():
@@ -218,13 +318,8 @@ def _validate_against_named_schema(
         raise MCPAssertionError(
             f"Unknown schema '{schema_name}'. Define it under schemas: in the suite file."
         )
-    try:
-        import jsonschema
-    except ImportError as exc:  # pragma: no cover
-        raise MCPAssertionError(
-            "assert_schema requires the jsonschema package "
-            "(pip install jsonschema or 'mcp-test-suite[dev]')"
-        ) from exc
+    import jsonschema
+
     try:
         jsonschema.validate(instance=payload, schema=schema)
     except jsonschema.ValidationError as exc:  # type: ignore[attr-defined]
@@ -233,11 +328,75 @@ def _validate_against_named_schema(
         ) from exc
 
 
+def _exception_code_and_message(exc: BaseException) -> tuple[int | None, str]:
+    """Extract JSON-RPC-ish code/message from tool/protocol errors."""
+    message = str(exc)
+    code: int | None = None
+    err = getattr(exc, "error", None)
+    if err is not None:
+        raw_code = getattr(err, "code", None)
+        if raw_code is not None:
+            try:
+                code = int(raw_code)
+            except (TypeError, ValueError):
+                code = None
+        raw_msg = getattr(err, "message", None)
+        if raw_msg:
+            message = str(raw_msg)
+    # Fallback: "code=-32041" / "code: -32041" in the message text.
+    if code is None:
+        m = re.search(r"\bcode[=:\s]+(-?\d+)", message, re.IGNORECASE)
+        if m:
+            code = int(m.group(1))
+    return code, message
+
+
+def _is_tool_or_protocol_error(exc: BaseException) -> bool:
+    """True for harness/tool assertion failures and MCP protocol errors only."""
+    if isinstance(exc, MCPAssertionError):
+        return True
+    if isinstance(exc, _INFRA_ERROR_TYPES):
+        return False
+    if getattr(exc, "error", None) is not None:
+        return True
+    # mcp.shared.exceptions.McpError (avoid hard import for older/newer SDKs)
+    mod = type(exc).__module__ or ""
+    if type(exc).__name__ == "McpError" and mod.startswith("mcp"):
+        return True
+    return False
+
+
+def _matches_error_spec(exc: BaseException, spec: ExpectErrorSpec | None) -> bool:
+    if spec is None:
+        return True
+    code, message = _exception_code_and_message(exc)
+    if spec.code is not None and code != spec.code:
+        return False
+    if spec.message_matches and spec.message_matches not in message:
+        return False
+    return True
+
+
+def _check_latency(case: DeclarativeCase, started: float) -> None:
+    if case.max_latency_ms is None:
+        return
+    elapsed_ms = (time.monotonic() - started) * 1000.0
+    if elapsed_ms > case.max_latency_ms:
+        raise MCPAssertionError(
+            f"Tool '{case.call}' latency {elapsed_ms:.1f}ms exceeds "
+            f"max_latency_ms={case.max_latency_ms}"
+        )
+
+
 def _build_case_func(
     case: DeclarativeCase,
     schemas: dict[str, dict[str, Any]],
 ) -> Callable:
-    """Compile a declarative case into an async test function."""
+    """Compile a declarative case into an async test function.
+
+    Assertions are composable on one case: expected value, schema, latency,
+    and expect_error may be combined (error path still honors max_latency_ms).
+    """
 
     async def _test(mcp_server: Any) -> None:
         if case.resource:
@@ -261,50 +420,41 @@ def _build_case_func(
                 f"Case '{case.name}' needs call/tool, resource, or prompt"
             )
 
-        # Latency-only cases use assert_latency (single tool call).
-        if (
-            case.max_latency_ms is not None
-            and case.expected is None
-            and not case.assert_schema
-            and not case.validate_input_schema
-            and not case.expect_error
-        ):
-            await assert_latency(
-                mcp_server,
-                case.call,
-                case.args,
-                max_ms=case.max_latency_ms,
-                runs=1,
-                aggregate="max",
-            )
-            return
-
         started = time.monotonic()
+        result: Any = None
         try:
             result = await assert_tool_call(
                 mcp_server,
                 case.call,
                 case.args,
-                expected=case.expected,
-                validate_against_input_schema=case.validate_input_schema,
+                expected=None if case.expect_error else case.expected,
+                validate_against_input_schema=(
+                    False if case.expect_error else case.validate_input_schema
+                ),
             )
-        except Exception:
-            # Protocol/tool errors (McpError) and assertion failures both satisfy expect_error.
-            if case.expect_error:
-                return
+        except _INFRA_ERROR_TYPES:
             raise
+        except Exception as exc:
+            if not case.expect_error:
+                raise
+            if not _is_tool_or_protocol_error(exc):
+                raise
+            if not _matches_error_spec(exc, case.expect_error_spec):
+                code, message = _exception_code_and_message(exc)
+                raise MCPAssertionError(
+                    f"Tool '{case.call}' failed, but error did not match expect_error "
+                    f"(got code={code!r} message={message!r}; "
+                    f"want {case.expect_error_spec!r})"
+                ) from exc
+            _check_latency(case, started)
+            return
 
         if case.expect_error:
             raise MCPAssertionError(
                 f"Tool '{case.call}' was expected to error but succeeded"
             )
 
-        elapsed_ms = (time.monotonic() - started) * 1000.0
-        if case.max_latency_ms is not None and elapsed_ms > case.max_latency_ms:
-            raise MCPAssertionError(
-                f"Tool '{case.call}' latency {elapsed_ms:.1f}ms exceeds "
-                f"max_latency_ms={case.max_latency_ms}"
-            )
+        _check_latency(case, started)
 
         if case.assert_schema:
             payload = _result_payload(result)
@@ -345,8 +495,6 @@ def load_declarative_modules(
     filter_marker: str | None = None,
 ) -> list[HarnessModule]:
     """Discover and compile declarative suites under *paths*."""
-    from mcp_test_harness.discovery import _matches_marker_filter, _matches_name_filter
-
     modules: list[HarnessModule] = []
     for suite_path in discover_suite_files(paths):
         try:
@@ -357,15 +505,11 @@ def load_declarative_modules(
         if not suite.cases:
             continue
         module = compile_suite(suite)
-        if filter_name or filter_marker:
-            kept = []
-            for case in module.test_cases:
-                if filter_name and not _matches_name_filter(case.name, filter_name):
-                    continue
-                if filter_marker and not _matches_marker_filter(case.markers, filter_marker):
-                    continue
-                kept.append(case)
-            module.test_cases = kept
+        module.test_cases = filter_cases(
+            module.test_cases,
+            filter_name=filter_name,
+            filter_marker=filter_marker,
+        )
         if module.test_cases:
             modules.append(module)
     return modules

@@ -10,6 +10,7 @@ from mcp_test_suite.declarative import (
     load_declarative_modules,
     load_suite_file,
 )
+from mcp_test_suite.filters import filter_cases
 from mcp_test_suite.runtime import RUNTIME
 
 name = "mcp-test-suite-declarative"
@@ -29,24 +30,11 @@ def register(context: Any) -> None:
                 if not suite.cases:
                     continue
                 module = compile_suite(suite)
-                if RUNTIME.filter_name or RUNTIME.filter_marker:
-                    from mcp_test_harness.discovery import (
-                        _matches_marker_filter,
-                        _matches_name_filter,
-                    )
-
-                    kept = []
-                    for case in module.test_cases:
-                        if RUNTIME.filter_name and not _matches_name_filter(
-                            case.name, RUNTIME.filter_name
-                        ):
-                            continue
-                        if RUNTIME.filter_marker and not _matches_marker_filter(
-                            case.markers, RUNTIME.filter_marker
-                        ):
-                            continue
-                        kept.append(case)
-                    module.test_cases = kept
+                module.test_cases = filter_cases(
+                    module.test_cases,
+                    filter_name=RUNTIME.filter_name,
+                    filter_marker=RUNTIME.filter_marker,
+                )
                 if module.test_cases:
                     extra.append(module)
         else:
