@@ -1,4 +1,4 @@
-import { MCPClient } from '@mcp-test-suite/jest';
+import { MCPClient } from '@vaquarkhan/mcp-test-suite-jest';
 
 const server = new MCPClient({
   command: 'node dist/main.js',

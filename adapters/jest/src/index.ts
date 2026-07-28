@@ -1,5 +1,5 @@
 /**
- * @mcp-test-suite/jest — thin Node adapter over the mcp-suite CLI wrapper.
+ * @vaquarkhan/mcp-test-suite-jest — thin Node adapter over the mcp-suite CLI wrapper.
  *
  * Does not reimplement MCP protocol logic; shells out to ``mcp-suite``
  * (install: ``pip install mcp-test-harness`` + this suite package).

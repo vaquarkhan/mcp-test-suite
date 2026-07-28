@@ -37,7 +37,7 @@ mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report
 | Audience | How to test | Tutorial |
 |----------|-------------|----------|
 | Any language | `mcp-suite run --suite …` | [tutorials/yaml.md](tutorials/yaml.md) |
-| Node / Nest / Express / Fastify | `@mcp-test-suite/jest` | [tutorials/typescript.md](tutorials/typescript.md) |
+| Node / Nest / Express / Fastify | `@vaquarkhan/mcp-test-suite-jest` | [tutorials/typescript.md](tutorials/typescript.md) |
 | Java / Spring / Quarkus / Micronaut | `mcp-test-suite-junit5` | [tutorials/java.md](tutorials/java.md) |
 | Kotlin Spring / Ktor | Same JUnit 5 adapter | [tutorials/java.md](tutorials/java.md) |
 | Go | `adapters/gotest` | [tutorials/go.md](tutorials/go.md) |

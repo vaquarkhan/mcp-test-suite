@@ -131,7 +131,7 @@ mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report
 |----------|----------|----------|----------|
 | **Any (YAML)** | PyPI engine + `mcp-suite` | [yaml](docs/tutorials/yaml.md) | [declarative/](examples/declarative/) |
 | **Python** | `pip install mcp-test-harness` | [python](docs/tutorials/python.md) | [frameworks/python](examples/frameworks/python/) |
-| **TypeScript** | `@mcp-test-suite/jest` | [typescript](docs/tutorials/typescript.md) | [frameworks/typescript](examples/frameworks/typescript/) |
+| **TypeScript** | `@vaquarkhan/mcp-test-suite-jest` | [typescript](docs/tutorials/typescript.md) | [frameworks/typescript](examples/frameworks/typescript/) |
 | **Java / Kotlin** | Maven `mcp-test-suite-junit5` | [java](docs/tutorials/java.md) | [frameworks/java](examples/frameworks/java/) · [kotlin](examples/frameworks/kotlin/) |
 | **Go** | `adapters/gotest` module | [go](docs/tutorials/go.md) | [frameworks/go](examples/frameworks/go/) |
 | **.NET** | `McpTestSuite.Xunit` | [dotnet](docs/tutorials/dotnet.md) | [frameworks/dotnet](examples/frameworks/dotnet/) |

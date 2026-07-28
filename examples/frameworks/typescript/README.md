@@ -1,6 +1,6 @@
 # TypeScript / Node framework examples
 
-Uses [`@mcp-test-suite/jest`](../../../adapters/jest/).
+Uses [`@vaquarkhan/mcp-test-suite-jest`](../../../adapters/jest/).
 
 | Example | Stack | Typical command |
 |---------|-------|-----------------|

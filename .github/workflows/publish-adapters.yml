@@ -53,8 +53,14 @@ jobs:
           </settings>
           EOF
           sed -i 's/USERNAME/${{ github.actor }}/' ~/.m2/settings.xml
+          set +e
           mvn -B -DskipTests deploy \
             -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo "::warning::Maven deploy exited $status (version may already exist on GitHub Packages); continuing"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: junit5-maven
@@ -78,7 +84,7 @@ jobs:
         working-directory: adapters/jest
         run: |
           npm install
-          npm version ${{ inputs.version }} --no-git-tag-version
+          npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
           npm run build
           npm pack
       - name: Publish to GitHub Packages

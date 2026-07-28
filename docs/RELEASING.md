@@ -15,7 +15,7 @@ Details: [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md).
 | Artifact | Trigger | Workflow |
 |----------|---------|----------|
 | **Maven Central** (`mcp-test-suite-junit5`) | `workflow_dispatch` → adapters | [publish-adapters.yml](../.github/workflows/publish-adapters.yml) |
-| **npm** (`@mcp-test-suite/jest`) | same | same |
+| **npm** (`@vaquarkhan/mcp-test-suite-jest`) | same | same |
 | **NuGet** (`McpTestSuite.Xunit`) | same | same |
 | **Go module** | git tag `adapters/gotest/v*` | push tag (no PyPI) |
 | **GHCR Docker** (optional) | tag `v*` | [docker-publish.yml](../.github/workflows/docker-publish.yml) |
