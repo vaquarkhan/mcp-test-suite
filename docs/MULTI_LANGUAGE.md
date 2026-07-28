@@ -1,6 +1,6 @@
 # Multi-language adoption (mcp-test-suite)
 
-**mcp-test-suite** is the multi-language layer on top of [mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness) (**PyPI**). The engine is never vendored here. Non-Python teams share `mcp-suite.yaml` and native adapters.
+**mcp-test-suite** is the multi-language connector layer on top of [mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness) (PyPI). Non-Python teams share `mcp-suite.yaml` and native adapters.
 
 ## Architecture
 

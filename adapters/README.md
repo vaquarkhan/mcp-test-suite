@@ -1,16 +1,17 @@
 # Language adapters
 
-Thin native wrappers around the **mcp-test** engine. They do **not** reimplement MCP protocol logic.
+Native wrappers around the **mcp-test-harness** engine. Each adapter shells out to `mcp-suite` for shared YAML contracts.
 
-**Install from public registries:** see **[docs/DOWNLOADS.md](../docs/DOWNLOADS.md)**.
+**Install:** [docs/DOWNLOADS.md](../docs/DOWNLOADS.md) · **Release:** [v4.0.0](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
 
 | Adapter | Registry | Install |
 |---------|----------|---------|
-| [junit5/](junit5/) | **Maven Central** | `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0` |
-| [jest/](jest/) | **npm** | `npm i -D @vaquarkhan/mcp-test-suite-jest` |
-| [gotest/](gotest/) | **Go modules** | `go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0` |
-| [xunit/](xunit/) | **NuGet** | `dotnet add package McpTestSuite.Xunit --version 4.0.0` |
-| Python engine | **PyPI** (via **mcp-test-harness** repo only) | `pip install mcp-test-harness` |
-| Universal | **Docker / GHCR** | `docker build -t mcp-test-suite:local .` now; later `docker pull ghcr.io/vaquarkhan/mcp-test-suite:latest` |
+| [junit5/](junit5/) | GitHub Packages (Maven) | `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0` |
+| [jest/](jest/) | GitHub Packages (npm) | `npm i -D @vaquarkhan/mcp-test-suite-jest` |
+| [gotest/](gotest/) | Go module | `go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0` |
+| [xunit/](xunit/) | GitHub Packages (NuGet) | `dotnet add package McpTestSuite.Xunit --version 4.0.0` |
+| Python engine | PyPI | `pip install mcp-test-harness` |
+| Connectors | git / pip | `pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"` |
+| Docker | local build | `docker build -t mcp-test-suite:local .` |
 
-Framework packs: **[examples/frameworks/](../examples/frameworks/)**. Publish: **[docs/PUBLISHING.md](../docs/PUBLISHING.md)**.
+Framework examples: [examples/frameworks/](../examples/frameworks/)

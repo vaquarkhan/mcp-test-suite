@@ -6,7 +6,7 @@ Minimal path from zero to a green MCP suite. Engine deep-dives live in [mcp-test
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .                 # from this repo root
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 mcp-suite --version
 ```
 

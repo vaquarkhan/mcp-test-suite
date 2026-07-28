@@ -1,16 +1,16 @@
 # mcp-test-suite/gotest
 
-## Download (Go modules)
+Go adapter for **mcp-test-suite**.
+
+## Install
 
 ```bash
 go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
 ```
 
-| Registry | Link |
-|----------|------|
-| pkg.go.dev | https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest |
+Docs: [pkg.go.dev](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest)
 
-Engine: `mcp-test` on `PATH` (PyPI, Docker, or release binary).
+Engine: `mcp-suite` on PATH — `pip install mcp-test-harness` + suite connectors ([DOWNLOADS.md](../../docs/DOWNLOADS.md)).
 
 ## Usage
 
@@ -19,4 +19,4 @@ client := gotest.New(gotest.Options{Command: "go run ./cmd/server", Suite: "mcp-
 res, err := client.RunSuite(ctx)
 ```
 
-Examples: [examples/frameworks/go](../../examples/frameworks/go/) · [docs/DOWNLOADS.md](../../docs/DOWNLOADS.md)
+Examples: [examples/frameworks/go](../../examples/frameworks/go/)

@@ -6,7 +6,7 @@ Copy-paste packs for popular MCP server stacks. Every pack shares the same idea:
 2. Launch the server with `--server-command` (or `server.command` in the YAML)
 3. Optionally use a native adapter (JUnit / Jest / Go / xUnit / Python)
 
-**Requires:** `pip install mcp-test-harness` + `pip install` this suite (`mcp-suite` on PATH).
+**Requires:** `pip install mcp-test-harness` + `pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"` (`mcp-suite` on PATH).
 
 | Ecosystem | Path | Frameworks | Tutorial |
 |-----------|------|------------|----------|

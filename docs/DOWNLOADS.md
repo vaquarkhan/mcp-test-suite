@@ -1,7 +1,7 @@
-# Downloads — 100% working install paths
+# Downloads (v4.0.0)
 
-**Engine (PyPI — live today):** [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/)  
-**Adapters:** GitHub Packages + [GitHub Releases](https://github.com/vaquarkhan/mcp-test-suite/releases) (published from this repo)
+**Engine (PyPI):** [`mcp-test-harness`](https://pypi.org/project/mcp-test-harness/)  
+**Adapters:** GitHub Packages + [Release v4.0.0](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
 
 | You use | Install |
 |---------|---------|
@@ -178,5 +178,4 @@ docker run --rm mcp-test-suite:local --version
 Actions → Publish language adapters → version 4.0.0 → dry_run false
 ```
 
-That workflow publishes to **GitHub Packages** and creates/updates **Release `v4.0.0`** with JAR / tgz / nupkg assets.  
-Optional later: Maven Central / npmjs / nuget.org when registry secrets exist ([PUBLISHING.md](PUBLISHING.md)).
+That workflow publishes to **GitHub Packages** and creates/updates **Release `v4.0.0`** with JAR / tgz / nupkg assets. See [PUBLISHING.md](PUBLISHING.md).

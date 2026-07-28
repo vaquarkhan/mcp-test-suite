@@ -4,43 +4,37 @@
 
 # MCP Test Suite
 
-> **Multi-language connectors for MCP servers.** One shared `mcp-suite.yaml`. Native adapters for Node, Java, Go, and .NET. Engine from PyPI — never vendored here.
+> **Multi-language MCP testing.** One shared `mcp-suite.yaml`. Native adapters for Node, Java, Go, and .NET.
 
-[![PyPI engine](https://img.shields.io/pypi/v/mcp-test-harness?label=engine%20(mcp-test-harness))](https://pypi.org/project/mcp-test-harness/)
+[![Release](https://img.shields.io/github/v/release/vaquarkhan/mcp-test-suite?label=adapters&display_name=tag)](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
+[![PyPI engine](https://img.shields.io/pypi/v/mcp-test-harness?label=engine)](https://pypi.org/project/mcp-test-harness/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![GHCR](https://img.shields.io/badge/ghcr.io-mcp--test--suite-2496ed?logo=github)](https://github.com/vaquarkhan/mcp-test-suite/pkgs/container/mcp-test-suite)
 [![Downloads](https://img.shields.io/badge/docs-DOWNLOADS.md-0ea5e9)](docs/DOWNLOADS.md)
 
-## How this relates to mcp-test-harness
+## What this is
 
 | Repo | Role |
 |------|------|
-| **[mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness)** | **Main engine** — already on **[PyPI](https://pypi.org/project/mcp-test-harness/)**. Assertions, transports, HTML dashboard, reports. |
-| **This repo (`mcp-test-suite`)** | **Connectors only** — declarative YAML, language adapters, Docker, GitHub Action. |
-
-```bash
-pip install "mcp-test-harness>=3.0.9"   # engine (PyPI — already live)
-```
+| **[mcp-test-harness](https://github.com/vaquarkhan/mcp-test-harness)** | Test engine on **[PyPI](https://pypi.org/project/mcp-test-harness/)** — assertions, transports, HTML dashboard, reports |
+| **This repo (`mcp-test-suite`)** | Connectors — `mcp-suite.yaml`, language adapters, Docker, GitHub Action |
 
 ![Architecture](./docs/images/architecture-suite.jpg)
 
-## Download & install (by language)
+## Install (v4.0.0)
 
-Full guide: **[docs/DOWNLOADS.md](docs/DOWNLOADS.md)** · Releases: **[github.com/…/releases](https://github.com/vaquarkhan/mcp-test-suite/releases)**
+Full guide: **[docs/DOWNLOADS.md](docs/DOWNLOADS.md)** · Release assets: **[Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)**
 
-### 1) Python engine (PyPI — live)
+### Python engine + `mcp-suite` CLI
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-mcp-test --version
-pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"   # mcp-suite CLI
-mcp-suite --version
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+mcp-test --version && mcp-suite --version
 ```
 
-### 2) Java / Kotlin — Maven (GitHub Packages)
+### Java / Kotlin (Maven — GitHub Packages)
 
 ```xml
-<!-- settings.xml server id=github + PAT with read:packages -->
 <repositories>
   <repository>
     <id>github</id>
@@ -55,12 +49,11 @@ mcp-suite --version
 </dependency>
 ```
 
-Or: download the JAR from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases) · Tutorial: [docs/tutorials/java.md](docs/tutorials/java.md)
+JAR also on [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) · [java tutorial](docs/tutorials/java.md)
 
-### 3) Node / TypeScript — npm (GitHub Packages)
+### Node / TypeScript (npm — GitHub Packages)
 
 ```ini
-# .npmrc
 @vaquarkhan:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
 ```
@@ -69,15 +62,15 @@ Or: download the JAR from [Releases](https://github.com/vaquarkhan/mcp-test-suit
 npm install -D @vaquarkhan/mcp-test-suite-jest
 ```
 
-Or install the `.tgz` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases). Tutorial: [docs/tutorials/typescript.md](docs/tutorials/typescript.md)
+Or install the `.tgz` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) · [typescript tutorial](docs/tutorials/typescript.md)
 
-### 4) Go — module (live)
+### Go
 
 ```bash
 go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
 ```
 
-### 5) .NET — NuGet (GitHub Packages)
+### .NET (NuGet — GitHub Packages)
 
 ```bash
 dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
@@ -85,7 +78,7 @@ dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
 dotnet add package McpTestSuite.Xunit --version 4.0.0
 ```
 
-### 6) Docker / CI
+### Docker / CI
 
 ```bash
 docker build -t mcp-test-suite:local .
@@ -102,12 +95,12 @@ docker run --rm -v "$PWD":/work -w /work mcp-test-suite:local \
 
 ---
 
-## 60-second start (any language)
+## Quick start
 
 ```yaml
 # mcp-suite.yaml
 server:
-  command: node dist/server.js   # or java -jar … / go run … / python …
+  command: node dist/server.js
   transport: stdio
 cases:
   - name: Echo works
@@ -119,7 +112,7 @@ cases:
 mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report.html
 ```
 
-**Same dashboard & reports as Python** — HTML / JUnit / JSON / SARIF are engine features available to every language via `mcp-suite.yaml` (you do not need `test_*.py`).
+HTML / JUnit / JSON / SARIF reports work for every language via the shared engine.
 
 ![Multi-language](./docs/images/multi-language-suite.jpg)
 
@@ -127,13 +120,13 @@ mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report
 
 ## Language support
 
-| Language | Download | Tutorial | Examples |
-|----------|----------|----------|----------|
-| **Any (YAML)** | PyPI engine + `mcp-suite` | [yaml](docs/tutorials/yaml.md) | [declarative/](examples/declarative/) |
-| **Python** | `pip install mcp-test-harness` | [python](docs/tutorials/python.md) | [frameworks/python](examples/frameworks/python/) |
+| Language | Package | Tutorial | Examples |
+|----------|---------|----------|----------|
+| **Any (YAML)** | `mcp-suite` | [yaml](docs/tutorials/yaml.md) | [declarative/](examples/declarative/) |
+| **Python** | `mcp-test-harness` | [python](docs/tutorials/python.md) | [frameworks/python](examples/frameworks/python/) |
 | **TypeScript** | `@vaquarkhan/mcp-test-suite-jest` | [typescript](docs/tutorials/typescript.md) | [frameworks/typescript](examples/frameworks/typescript/) |
-| **Java / Kotlin** | Maven `mcp-test-suite-junit5` | [java](docs/tutorials/java.md) | [frameworks/java](examples/frameworks/java/) · [kotlin](examples/frameworks/kotlin/) |
-| **Go** | `adapters/gotest` module | [go](docs/tutorials/go.md) | [frameworks/go](examples/frameworks/go/) |
+| **Java / Kotlin** | `mcp-test-suite-junit5` | [java](docs/tutorials/java.md) | [frameworks/java](examples/frameworks/java/) · [kotlin](examples/frameworks/kotlin/) |
+| **Go** | `adapters/gotest` | [go](docs/tutorials/go.md) | [frameworks/go](examples/frameworks/go/) |
 | **.NET** | `McpTestSuite.Xunit` | [dotnet](docs/tutorials/dotnet.md) | [frameworks/dotnet](examples/frameworks/dotnet/) |
 | **Rust** | YAML + CLI | [rust](docs/tutorials/rust.md) | [frameworks/rust](examples/frameworks/rust/) |
 
@@ -143,23 +136,13 @@ mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report
 
 [docs/CURSOR_IDE.md](docs/CURSOR_IDE.md) · [`.cursorrules`](.cursorrules)
 
-## End-to-end confidence
-
-```bash
-pip install -e ".[dev]"
-python -m pytest tests/ -q   # includes tests/e2e/
-```
-
-![E2E](./docs/images/dogfood-e2e.jpg)
-
-## Docs map
+## Docs
 
 | Doc | Purpose |
 |-----|---------|
-| [docs/DOWNLOADS.md](docs/DOWNLOADS.md) | Maven / npm / NuGet / Go / PyPI / Docker |
+| [docs/DOWNLOADS.md](docs/DOWNLOADS.md) | Install commands for every language |
 | [docs/QUICK_START.md](docs/QUICK_START.md) | First green run |
 | [docs/tutorials/](docs/tutorials/) | Per-language walkthroughs |
-| [docs/MULTI_LANGUAGE.md](docs/MULTI_LANGUAGE.md) | Adoption paths |
-| [docs/NO_PYPI_FROM_THIS_REPO.md](docs/NO_PYPI_FROM_THIS_REPO.md) | Engine stays on harness PyPI |
+| [docs/MULTI_LANGUAGE.md](docs/MULTI_LANGUAGE.md) | Architecture and adoption paths |
 
-Author: [Vaquar Khan](https://github.com/vaquarkhan) · **License:** [MIT](LICENSE) · **Cite:** [CITATION.cff](CITATION.cff)
+Author: [Vaquar Khan](https://github.com/vaquarkhan) · [CITATION.cff](CITATION.cff)
