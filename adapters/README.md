@@ -1,8 +1,15 @@
 # Language adapters
 
-Native wrappers around the **mcp-test-harness** engine. Each adapter shells out to `mcp-suite` for shared YAML contracts.
+**Package downloads (v4.0.0):**
+[Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
+[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
+[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
+[Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
+[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
+[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
+[Install guide](../docs/DOWNLOADS.md)
 
-**Install:** [docs/DOWNLOADS.md](../docs/DOWNLOADS.md) · **Release:** [v4.0.0](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0)
+Native wrappers around the **mcp-test-harness** engine. Each adapter shells out to `mcp-suite` for shared YAML contracts.
 
 | Adapter | Registry | Install |
 |---------|----------|---------|
