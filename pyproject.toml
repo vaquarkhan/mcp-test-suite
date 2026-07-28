@@ -42,8 +42,6 @@ dev = [
   "pytest-asyncio>=0.21.0",
   "jsonschema>=4.0.0",
   "coverage>=7.0.0",
-  # Fixture / e2e stdio server (tests/fixtures/minimal_mcp_server.py)
-  "mcp>=1.2.0",
 ]
 
 [project.urls]

@@ -52,9 +52,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Fixture server dependency (FastMCP)
-        run: python -m pip install "mcp>=1.2.0"
-
       - name: GitHub Action composite (try-mode against fixture)
         uses: ./.github/actions/mcp-test
         with:
