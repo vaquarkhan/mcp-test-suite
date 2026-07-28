@@ -1,5 +1,16 @@
 # Editors: Visual Studio Code, Cursor, and similar
 
+**Package downloads (v4.0.0):**
+[Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
+[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
+[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
+[Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
+[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
+[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
+[All IDEs](IDE_INTEGRATION.md)
+
+**AI IDEs & assistants (Cursor, Kiro, Google, ChatGPT, …):** [IDE_INTEGRATION.md](IDE_INTEGRATION.md)
+
 A good editor setup **speeds up** writing and running MCP server tests: YAML config, Python tests, and the **`mcp-test` CLI** in an integrated terminal.
 
 ## What this repo already gives you (high value, zero install)

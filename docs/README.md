@@ -21,7 +21,9 @@
 | [PUBLISHING.md](PUBLISHING.md) | Adapter publish via Actions (not PyPI engine) |
 | [RELEASING.md](RELEASING.md) | Release checklist |
 | [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md) | Engine vs connectors policy |
-| [CURSOR_IDE.md](CURSOR_IDE.md) | Cursor agent workflow |
+| [IDE_INTEGRATION.md](IDE_INTEGRATION.md) | Cursor, Kiro, Google, ChatGPT, VS Code, Windsurf, JetBrains, … |
+| [CURSOR_IDE.md](CURSOR_IDE.md) | Cursor-specific rules & tasks |
+| [EDITORS.md](EDITORS.md) | Snippets, extensions, terminal layout |
 | [CI_AND_REPORTS.md](CI_AND_REPORTS.md) | Action + reports |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Design notes (suite + engine) |
 

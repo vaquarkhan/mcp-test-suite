@@ -74,6 +74,7 @@ docker run --rm -v "$PWD":/work -w /work mcp-test-suite:local \
 
 Image installs **mcp-test-harness from PyPI** at build time. See [DOCKER.md](DOCKER.md).
 
-## Cursor IDE
+## IDE & AI assistants
 
-[CURSOR_IDE.md](CURSOR_IDE.md) — agent rules, tasks, and `mcp-test try` / `mcp-suite run` before `.cursor/mcp.json`.
+[IDE_INTEGRATION.md](IDE_INTEGRATION.md) — Cursor, Kiro, Google Antigravity, Gemini, ChatGPT, Codex, VS Code, Copilot, Windsurf, JetBrains, Zed, and terminal editors.  
+Cursor-only details: [CURSOR_IDE.md](CURSOR_IDE.md) · [`.cursorrules`](../.cursorrules) · [AGENTS.md](../AGENTS.md)

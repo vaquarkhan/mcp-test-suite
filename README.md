@@ -141,9 +141,11 @@ HTML / JUnit / JSON / SARIF reports work for every language via the shared engin
 
 ![Feature overview](./docs/images/feature-overview-suite.jpg)
 
-## Cursor IDE
+## IDE & AI assistants
 
-[docs/CURSOR_IDE.md](docs/CURSOR_IDE.md) · [`.cursorrules`](.cursorrules)
+Works with **Cursor**, **Kiro**, **Google Antigravity**, **Gemini Code Assist**, **ChatGPT**, **OpenAI Codex**, **VS Code**, **GitHub Copilot**, **Windsurf**, **JetBrains**, **Zed**, and more.
+
+[docs/IDE_INTEGRATION.md](docs/IDE_INTEGRATION.md) · [Cursor](docs/CURSOR_IDE.md) · [`.cursorrules`](.cursorrules) · [AGENTS.md](AGENTS.md)
 
 ## Docs
 
@@ -153,5 +155,6 @@ HTML / JUnit / JSON / SARIF reports work for every language via the shared engin
 | [docs/QUICK_START.md](docs/QUICK_START.md) | First green run |
 | [docs/tutorials/](docs/tutorials/) | Per-language walkthroughs |
 | [docs/MULTI_LANGUAGE.md](docs/MULTI_LANGUAGE.md) | Architecture and adoption paths |
+| [docs/IDE_INTEGRATION.md](docs/IDE_INTEGRATION.md) | Cursor, Kiro, Google, ChatGPT, VS Code, … |
 
 Author: [Vaquar Khan](https://github.com/vaquarkhan) · [CITATION.cff](CITATION.cff)
