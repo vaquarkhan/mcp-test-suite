@@ -71,7 +71,9 @@ Desktop.ini
 *.code-workspace
 
 # Cursor / other agent UI (local only)
-.cursor/
+.cursor/*
+!.cursor/skills/
+!.cursor/skills/**
 
 # Local env and secrets
 .env

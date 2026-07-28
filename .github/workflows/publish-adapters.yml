@@ -135,6 +135,29 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist-adapters
+      - name: Make GitHub Packages public
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Best-effort: public package pages + inherit public-repo visibility.
+          # GitHub Packages still requires a PAT with read:packages to *download*.
+          for spec in \
+            "maven/io.github.vaquarkhan.mcp-test-suite-junit5" \
+            "npm/mcp-test-suite-jest" \
+            "nuget/McpTestSuite.Xunit"
+          do
+            type="${spec%%/*}"
+            name="${spec#*/}"
+            echo "Setting visibility public for $type/$name"
+            gh api --method PUT \
+              "/user/packages/${type}/${name}/visibility" \
+              -f visibility=public \
+              || gh api --method PUT \
+              "/orgs/${{ github.repository_owner }}/packages/${type}/${name}/visibility" \
+              -f visibility=public \
+              || echo "::warning::Could not set visibility for $type/$name (may already be public or API unsupported)"
+          done
       - name: Create / update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -146,9 +169,14 @@ jobs:
           cat > "$NOTES" <<EOF
           ## MCP Test Suite adapters ${{ inputs.version }}
 
-          **Engine (PyPI — live):** \`pip install mcp-test-harness\`
+          **Engine (PyPI):** \`pip install mcp-test-harness\`
 
-          Download the assets below (JAR / npm tarball / NuGet), or install from **GitHub Packages** — see [DOWNLOADS.md](https://github.com/${{ github.repository }}/blob/init/docs/DOWNLOADS.md).
+          ### Package pages (GitHub Packages)
+          - **Maven:** https://github.com/${{ github.repository }}/packages?runtime=maven
+          - **npm:** https://github.com/users/${{ github.repository_owner }}/packages/npm/package/mcp-test-suite-jest
+          - **NuGet:** https://github.com/users/${{ github.repository_owner }}/packages/nuget/package/McpTestSuite.Xunit
+
+          Download assets below (JAR / npm tarball / NuGet), or install from GitHub Packages — see [DOWNLOADS.md](https://github.com/${{ github.repository }}/blob/init/docs/DOWNLOADS.md).
 
           **Go:** \`go get github.com/${{ github.repository }}/adapters/gotest@v${{ inputs.version }}\`
           EOF
