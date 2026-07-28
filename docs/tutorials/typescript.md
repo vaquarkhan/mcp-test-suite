@@ -8,17 +8,21 @@ pip install .
 # ensure mcp-suite is on PATH
 ```
 
-## Link the Jest adapter (from source)
+## Link / install the Jest adapter
 
 ```bash
+# GitHub Packages
+npm install -D @vaquarkhan/mcp-test-suite-jest
+
+# or from source
 cd adapters/jest
 npm install && npm run build && npm link
 ```
 
-In your app:
+In your app (when using link):
 
 ```bash
-npm link @mcp-test-suite/jest
+npm link @vaquarkhan/mcp-test-suite-jest
 ```
 
 ## Shared suite
@@ -37,7 +41,7 @@ cases:
 ## Spec
 
 ```ts
-import { MCPClient } from "@mcp-test-suite/jest";
+import { MCPClient } from "@vaquarkhan/mcp-test-suite-jest";
 
 const server = new MCPClient({
   command: "node dist/main.js",

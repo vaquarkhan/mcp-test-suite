@@ -128,22 +128,17 @@ runs:
       shell: bash
       env:
         HARNESS_VERSION: ${{ inputs.harness-version }}
-        ACTION_PATH: ${{ github.action_path }}
       run: |
+        set -euo pipefail
         python -m pip install --upgrade pip
         if [ "$HARNESS_VERSION" = "latest" ]; then
-          pip install "mcp-test-harness>=3.0.9"
+          python -m pip install "mcp-test-harness>=3.0.9"
         else
-          pip install "mcp-test-harness==$HARNESS_VERSION"
+          python -m pip install "mcp-test-harness==$HARNESS_VERSION"
         fi
-        # Connectors (declarative YAML + mcp-test run wrapper).
-        SUITE_ROOT="$ACTION_PATH"
-        if [ ! -f "$SUITE_ROOT/pyproject.toml" ]; then
-          SUITE_ROOT="$(cd "$ACTION_PATH/../.." && pwd)"
-        fi
-        if [ -f "$SUITE_ROOT/pyproject.toml" ]; then
-          pip install "$SUITE_ROOT"
-        fi
+        python -m pip install "${GITHUB_WORKSPACE}"
+        python -m pip show mcp-test-suite
+        command -v mcp-suite
         mcp-suite --version
 
     - name: Pull Docker engine image

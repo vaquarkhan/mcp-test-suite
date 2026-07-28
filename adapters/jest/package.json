@@ -1,7 +1,7 @@
 {
-  "name": "@mcp-test-suite/jest",
+  "name": "@vaquarkhan/mcp-test-suite-jest",
   "version": "4.0.0",
-  "description": "Jest / Vitest adapter for mcp-test-suite — orchestrates the mcp-test CLI",
+  "description": "Jest / Vitest adapter for mcp-test-suite — orchestrates the mcp-suite CLI",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist", "src", "README.md"],
@@ -23,6 +23,7 @@
     "url": "https://github.com/vaquarkhan/mcp-test-suite/issues"
   },
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "access": "public"
   },
   "engines": { "node": ">=18" },

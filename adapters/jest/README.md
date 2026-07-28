@@ -1,24 +1,28 @@
-# @mcp-test-suite/jest
+# `@vaquarkhan/mcp-test-suite-jest`
 
-## Download (npm)
+## Install (GitHub Packages)
 
-```bash
-npm install -D @mcp-test-suite/jest
+```ini
+# .npmrc
+@vaquarkhan:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
 ```
 
-| Registry | Link |
-|----------|------|
-| npm | https://www.npmjs.com/package/@mcp-test-suite/jest |
+```bash
+npm install -D @vaquarkhan/mcp-test-suite-jest
+```
 
-Engine: `pip install mcp-test-suite` or Docker / release binary.
+Or download the `.tgz` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases).
+
+Engine: `pip install mcp-test-harness` + `pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"` (`mcp-suite` on PATH).
 
 ## Usage
 
 ```typescript
-import { MCPClient } from '@mcp-test-suite/jest';
+import { MCPClient } from "@vaquarkhan/mcp-test-suite-jest";
 
-test('suite', async () => {
-  const server = new MCPClient({ command: 'node dist/main.js', suite: 'mcp-suite.yaml' });
+test("suite", async () => {
+  const server = new MCPClient({ command: "node dist/main.js", suite: "mcp-suite.yaml" });
   await expect(server.runSuite()).resolves.toMatchObject({ ok: true });
 });
 ```

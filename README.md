@@ -26,30 +26,27 @@ pip install "mcp-test-harness>=3.0.9"   # engine (PyPI — already live)
 
 ## Download & install (by language)
 
-Full guide: **[docs/DOWNLOADS.md](docs/DOWNLOADS.md)** · Publish steps: **[docs/PUBLISHING.md](docs/PUBLISHING.md)**
+Full guide: **[docs/DOWNLOADS.md](docs/DOWNLOADS.md)** · Releases: **[github.com/…/releases](https://github.com/vaquarkhan/mcp-test-suite/releases)**
 
-### 1) Python engine (PyPI — live today)
+### 1) Python engine (PyPI — live)
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
 mcp-test --version
-```
-
-Optional: install this repo’s connectors (`mcp-suite` CLI) from GitHub:
-
-```bash
-pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
-# or clone and: pip install .
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"   # mcp-suite CLI
 mcp-suite --version
 ```
 
-### 2) Java / Kotlin — Maven
-
-**Coordinates:** `io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0`
-
-**Maven `pom.xml`:**
+### 2) Java / Kotlin — Maven (GitHub Packages)
 
 ```xml
+<!-- settings.xml server id=github + PAT with read:packages -->
+<repositories>
+  <repository>
+    <id>github</id>
+    <url>https://maven.pkg.github.com/vaquarkhan/mcp-test-suite</url>
+  </repository>
+</repositories>
 <dependency>
   <groupId>io.github.vaquarkhan</groupId>
   <artifactId>mcp-test-suite-junit5</artifactId>
@@ -58,70 +55,35 @@ mcp-suite --version
 </dependency>
 ```
 
-**Gradle (Kotlin DSL):**
+Or: download the JAR from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases) · Tutorial: [docs/tutorials/java.md](docs/tutorials/java.md)
 
-```kotlin
-testImplementation("io.github.vaquarkhan:mcp-test-suite-junit5:4.0.0")
+### 3) Node / TypeScript — npm (GitHub Packages)
+
+```ini
+# .npmrc
+@vaquarkhan:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
 ```
-
-**Until Maven Central is live**, install from this repo into your local `~/.m2`:
 
 ```bash
-git clone https://github.com/vaquarkhan/mcp-test-suite.git
-cd mcp-test-suite/adapters/junit5
-mvn -q clean install
+npm install -D @vaquarkhan/mcp-test-suite-jest
 ```
 
-Also put the engine on PATH: `pip install mcp-test-harness` (adapters call `mcp-suite` / `mcp-test`).
+Or install the `.tgz` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases). Tutorial: [docs/tutorials/typescript.md](docs/tutorials/typescript.md)
 
-Tutorial: [docs/tutorials/java.md](docs/tutorials/java.md)
-
-### 3) Node / TypeScript — npm
-
-```bash
-npm install -D @mcp-test-suite/jest
-# yarn add -D @mcp-test-suite/jest
-# pnpm add -D @mcp-test-suite/jest
-```
-
-**Until npm publish is live**, link from source:
-
-```bash
-cd adapters/jest && npm install && npm run build && npm link
-# in your app:
-npm link @mcp-test-suite/jest
-```
-
-Tutorial: [docs/tutorials/typescript.md](docs/tutorials/typescript.md)
-
-### 4) Go — module
+### 4) Go — module (live)
 
 ```bash
 go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
 ```
 
-Or with a local replace:
-
-```go
-require github.com/vaquarkhan/mcp-test-suite/adapters/gotest v0.0.0
-replace github.com/vaquarkhan/mcp-test-suite/adapters/gotest => ../mcp-test-suite/adapters/gotest
-```
-
-Tutorial: [docs/tutorials/go.md](docs/tutorials/go.md)
-
-### 5) .NET — NuGet
+### 5) .NET — NuGet (GitHub Packages)
 
 ```bash
+dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
+  --name github --username USER --password PAT --store-password-in-clear-text
 dotnet add package McpTestSuite.Xunit --version 4.0.0
 ```
-
-**Until NuGet is live**, project-reference the adapter:
-
-```xml
-<ProjectReference Include="..\mcp-test-suite\adapters\xunit\McpTestSuite.Xunit.csproj" />
-```
-
-Tutorial: [docs/tutorials/dotnet.md](docs/tutorials/dotnet.md)
 
 ### 6) Docker / CI
 

@@ -53,7 +53,7 @@ def test_go_adapter_module_builds_when_go_present():
 def test_jest_adapter_package_json_valid():
     pkg = ROOT / "adapters" / "jest" / "package.json"
     data = json.loads(pkg.read_text(encoding="utf-8"))
-    assert data.get("name") == "@mcp-test-suite/jest"
+    assert data.get("name") == "@vaquarkhan/mcp-test-suite-jest"
     assert "bin" in data or data.get("main") or data.get("exports")
 
 

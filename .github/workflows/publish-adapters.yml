@@ -1,29 +1,26 @@
 name: Publish language adapters
 
+# Publishes adapters to GitHub Packages and attaches binaries to a GitHub Release.
+# Uses GITHUB_TOKEN only (no npmjs / Maven Central / nuget.org secrets).
+
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: "Adapter to publish"
+      version:
+        description: "Package / release version"
         required: true
-        type: choice
-        options:
-          - junit5
-          - jest
-          - xunit
-          - all
+        default: "4.0.0"
       dry_run:
-        description: "Build only (no publish)"
+        description: "Build only (no publish / no release)"
         type: boolean
-        default: true
+        default: false
 
 permissions:
-  contents: read
-  id-token: write
+  contents: write
+  packages: write
 
 jobs:
   junit5:
-    if: inputs.target == 'junit5' || inputs.target == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,67 +29,128 @@ jobs:
           distribution: temurin
           java-version: "17"
           cache: maven
-          server-id: central
-          server-username: CENTRAL_USERNAME
-          server-password: CENTRAL_PASSWORD
-          gpg-private-key: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
-          gpg-passphrase: JRELEASER_GPG_PASSPHRASE
-      - name: Build / deploy Maven Central
+      - name: Package
+        working-directory: adapters/junit5
+        run: |
+          sed -i 's#<version>4.0.0</version>#<version>${{ inputs.version }}</version>#' pom.xml
+          mvn -B -DskipTests clean package
+      - name: Deploy to GitHub Packages
+        if: ${{ inputs.dry_run == false }}
         working-directory: adapters/junit5
         env:
-          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
-          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            mvn -B -DskipTests clean package
-          else
-            mvn -B -DskipTests -Prelease clean deploy
-          fi
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'EOF'
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>USERNAME</username>
+                <password>${env.GITHUB_TOKEN}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+          sed -i 's/USERNAME/${{ github.actor }}/' ~/.m2/settings.xml
+          mvn -B -DskipTests deploy \
+            -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: junit5-maven
+          path: |
+            adapters/junit5/target/mcp-test-suite-junit5-*.jar
+            !adapters/junit5/target/*-sources.jar
+            !adapters/junit5/target/*-javadoc.jar
+            adapters/junit5/pom.xml
+          if-no-files-found: error
 
   jest:
-    if: inputs.target == 'jest' || inputs.target == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: https://registry.npmjs.org
-      - name: Build / publish npm
+          registry-url: https://npm.pkg.github.com
+          scope: "@vaquarkhan"
+      - name: Build
+        working-directory: adapters/jest
+        run: |
+          npm install
+          npm version ${{ inputs.version }} --no-git-tag-version
+          npm run build
+          npm pack
+      - name: Publish to GitHub Packages
+        if: ${{ inputs.dry_run == false }}
         working-directory: adapters/jest
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm ci || npm install
-          npm run build
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            npm pack
-          else
-            npm publish --access public
-          fi
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jest-npm
+          path: adapters/jest/*.tgz
+          if-no-files-found: error
 
   xunit:
-    if: inputs.target == 'xunit' || inputs.target == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
-      - name: Pack / push NuGet
+      - name: Pack
         working-directory: adapters/xunit
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet pack -c Release -o ../../dist/nuget
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            ls -la ../../dist/nuget
-          else
-            dotnet nuget push ../../dist/nuget/*.nupkg \
-              --api-key "$NUGET_API_KEY" \
-              --source https://api.nuget.org/v3/index.json \
-              --skip-duplicate
-          fi
+          dotnet pack -c Release -p:PackageVersion=${{ inputs.version }} -o ../../dist/nuget
+          ls -la ../../dist/nuget
+      - name: Push to GitHub Packages
+        if: ${{ inputs.dry_run == false }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget push dist/nuget/*.nupkg \
+            --api-key "$GITHUB_TOKEN" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --skip-duplicate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xunit-nuget
+          path: dist/nuget/*
+          if-no-files-found: error
 
-# registered 2026-07-28T08:27:37.9166825-05:00
+  release:
+    needs: [junit5, jest, xunit]
+    if: ${{ inputs.dry_run == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist-adapters
+      - name: Create / update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="v${{ inputs.version }}"
+          find dist-adapters -type f | sort
+          NOTES="$(mktemp)"
+          cat > "$NOTES" <<EOF
+          ## MCP Test Suite adapters ${{ inputs.version }}
+
+          **Engine (PyPI — live):** \`pip install mcp-test-harness\`
+
+          Download the assets below (JAR / npm tarball / NuGet), or install from **GitHub Packages** — see [DOWNLOADS.md](https://github.com/${{ github.repository }}/blob/init/docs/DOWNLOADS.md).
+
+          **Go:** \`go get github.com/${{ github.repository }}/adapters/gotest@v${{ inputs.version }}\`
+          EOF
+          mapfile -t FILES < <(find dist-adapters -type f \( -name '*.jar' -o -name '*.tgz' -o -name '*.nupkg' -o -name '*.snupkg' -o -name 'pom.xml' \))
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+          else
+            gh release create "$TAG" "${FILES[@]}" \
+              --title "Adapters ${{ inputs.version }}" \
+              --notes-file "$NOTES"
+          fi
