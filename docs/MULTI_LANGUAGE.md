@@ -46,14 +46,21 @@ mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report
 | Audience | How to test | Tutorial |
 |----------|-------------|----------|
 | Any language | `mcp-suite run --suite …` | [tutorials/yaml.md](tutorials/yaml.md) |
-| Node / Nest / Express / Fastify | `@vaquarkhan/mcp-test-suite-jest` | [tutorials/typescript.md](tutorials/typescript.md) |
-| Java / Spring / Quarkus / Micronaut | `mcp-test-suite-junit5` | [tutorials/java.md](tutorials/java.md) |
-| Kotlin Spring / Ktor | Same JUnit 5 adapter | [tutorials/java.md](tutorials/java.md) |
+| NestJS | `@vaquarkhan/mcp-test-suite-jest` | [tutorials/nestjs.md](tutorials/nestjs.md) |
+| Express | Jest adapter | [tutorials/express.md](tutorials/express.md) |
+| Fastify | Jest adapter | [tutorials/fastify.md](tutorials/fastify.md) |
+| Spring Boot | `mcp-test-suite-junit5` | [tutorials/spring-boot.md](tutorials/spring-boot.md) |
+| Spring AI | JUnit 5 | [tutorials/spring-ai.md](tutorials/spring-ai.md) |
+| Quarkus | JUnit 5 | [tutorials/quarkus.md](tutorials/quarkus.md) |
+| Micronaut | JUnit 5 | [tutorials/micronaut.md](tutorials/micronaut.md) |
+| Kotlin Spring / Ktor | JUnit 5 | [tutorials/kotlin.md](tutorials/kotlin.md) |
+| FastMCP / FastAPI | YAML and/or `test_*.py` | [tutorials/python.md](tutorials/python.md) |
 | Go | `adapters/gotest` | [tutorials/go.md](tutorials/go.md) |
 | .NET | `adapters/xunit` | [tutorials/dotnet.md](tutorials/dotnet.md) |
-| Python | YAML and/or `test_*.py` | [tutorials/python.md](tutorials/python.md) |
 | Rust | YAML + `cargo test` | [tutorials/rust.md](tutorials/rust.md) |
 | CI | Universal GitHub Action | [CI_AND_REPORTS.md](CI_AND_REPORTS.md) |
+
+All tutorials: [tutorials/README.md](tutorials/README.md)
 
 ## Framework example packs
 

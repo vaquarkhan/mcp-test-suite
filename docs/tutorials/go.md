@@ -2,27 +2,28 @@
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
 [Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
 [Install guide](../DOWNLOADS.md)
 
-## Install engine + suite
+Test Go MCP servers with the **gotest** adapter or CLI-only `mcp-suite`.
+
+Example pack: [examples/frameworks/go/](../../examples/frameworks/go/)
+
+## 1. Install engine + suite
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+mcp-suite --version
 ```
 
-## Module
+## 2. Add Go module
 
 ```bash
 go get github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0
 ```
 
-Or local replace while developing:
+Local replace while developing this repo:
 
 ```go
 require github.com/vaquarkhan/mcp-test-suite/adapters/gotest v4.0.0
@@ -30,7 +31,32 @@ require github.com/vaquarkhan/mcp-test-suite/adapters/gotest v4.0.0
 replace github.com/vaquarkhan/mcp-test-suite/adapters/gotest => ../mcp-test-suite/adapters/gotest
 ```
 
-## Test
+## 3. Suite
+
+```yaml
+# mcp-suite.yaml
+server:
+  command: go run ./cmd/server
+  transport: stdio
+cases:
+  - name: Echo
+    call: echo
+    args: { text: hello-go }
+    tags: [smoke, go]
+  - name: Unknown tool fails
+    call: __missing__
+    args: {}
+    expect_error: true
+```
+
+## 4. Run (CLI)
+
+```bash
+mcp-suite run --suite mcp-suite.yaml --server-command "go run ./cmd/server"
+mcp-test try --server-command "go run ./cmd/server"
+```
+
+## 5. Run (Go test)
 
 ```go
 package mcp_test
@@ -46,7 +72,6 @@ func TestMCPSuite(t *testing.T) {
     c := gotest.New(gotest.Options{
         Command: "go run ./cmd/server",
         Suite:   "mcp-suite.yaml",
-        // Binary defaults to mcp-suite
     })
     if _, err := c.RunSuite(context.Background()); err != nil {
         t.Fatal(err)
@@ -54,10 +79,15 @@ func TestMCPSuite(t *testing.T) {
 }
 ```
 
-CLI-only:
-
 ```bash
-mcp-suite run --suite mcp-suite.yaml --server-command "go run ./cmd/server"
+go test ./...
 ```
 
-Example: [examples/frameworks/go/](../../examples/frameworks/go/)
+## Go notes
+
+- Prefer a built binary in CI (`go build -o bin/server ./cmd/server`) for faster, stable boots.
+- Logs → stderr only on stdio.
+
+## Related
+
+- [yaml.md](yaml.md) · [IDE_INTEGRATION.md](../IDE_INTEGRATION.md)

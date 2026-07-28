@@ -1,24 +1,24 @@
-# Tutorial: .NET (xUnit)
+# Tutorial: .NET / ASP.NET (xUnit)
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
-[Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
+[.NET / NuGet](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) ·
 [Install guide](../DOWNLOADS.md)
 
-## Install engine + suite
+Test **ASP.NET / .NET** MCP servers with `mcp-suite.yaml` and the xUnit adapter.
+
+Example pack: [examples/frameworks/dotnet/](../../examples/frameworks/dotnet/)
+
+## 1. Install engine + suite
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
 ```
 
-## Install adapter
+## 2. Install NuGet adapter
 
-**GitHub Packages** (see [DOWNLOADS.md](../DOWNLOADS.md)):
+**Package page:** [McpTestSuite.Xunit](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit)
 
 ```bash
 dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
@@ -30,13 +30,30 @@ dotnet nuget add source "https://nuget.pkg.github.com/vaquarkhan/index.json" \
 dotnet add package McpTestSuite.Xunit --version 4.0.0
 ```
 
-Or project reference / Release `.nupkg`:
+Or download `.nupkg` from [Releases](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0).
 
-```xml
-<ProjectReference Include="..\mcp-test-suite\adapters\xunit\McpTestSuite.Xunit.csproj" />
+## 3. Suite
+
+```yaml
+server:
+  command: dotnet run --project src/McpServer
+  transport: stdio
+cases:
+  - name: Echo
+    call: echo
+    args: { text: hello-dotnet }
+    tags: [smoke, dotnet]
 ```
 
-## Test
+## 4. Run (CLI)
+
+```bash
+dotnet build
+mcp-suite run --suite mcp-suite.yaml \
+  --server-command "dotnet run --project src/McpServer"
+```
+
+## 5. Run (xUnit)
 
 ```csharp
 public class McpTests
@@ -46,9 +63,8 @@ public class McpTests
     {
         var client = new McpClient(new McpClientOptions
         {
-            Command = "dotnet run --project src/Server",
+            Command = "dotnet run --project src/McpServer",
             Suite = "mcp-suite.yaml",
-            // Binary defaults to mcp-suite
         });
         var result = await client.RunSuiteAsync();
         Assert.True(result.Passed, result.Stderr);
@@ -56,4 +72,15 @@ public class McpTests
 }
 ```
 
-Example: [examples/frameworks/dotnet/](../../examples/frameworks/dotnet/)
+```bash
+dotnet test
+```
+
+## .NET notes
+
+- In CI, prefer `dotnet build` then run the built DLL/exe instead of `dotnet run` for faster cold starts.
+- Keep console logging off stdout for stdio MCP.
+
+## Related
+
+- [yaml.md](yaml.md) · Pack: [examples/frameworks/dotnet/](../../examples/frameworks/dotnet/)

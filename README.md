@@ -136,15 +136,18 @@ HTML / JUnit / JSON / SARIF reports work for every language via the shared engin
 
 ## Language support
 
-| Language | Package | Tutorial | Examples |
-|----------|---------|----------|----------|
+| Language | Package | Tutorials | Examples |
+|----------|---------|-----------|----------|
 | **Any (YAML)** | `mcp-suite` | [yaml](docs/tutorials/yaml.md) | [declarative/](examples/declarative/) |
-| **Python** | `mcp-test-harness` | [python](docs/tutorials/python.md) | [frameworks/python](examples/frameworks/python/) |
-| **TypeScript** | `@vaquarkhan/mcp-test-suite-jest` | [typescript](docs/tutorials/typescript.md) | [frameworks/typescript](examples/frameworks/typescript/) |
-| **Java / Kotlin** | `mcp-test-suite-junit5` | [java](docs/tutorials/java.md) | [frameworks/java](examples/frameworks/java/) · [kotlin](examples/frameworks/kotlin/) |
+| **Python** | `mcp-test-harness` | [overview](docs/tutorials/python.md) · [FastMCP](docs/tutorials/fastmcp.md) · [FastAPI](docs/tutorials/fastapi.md) | [frameworks/python](examples/frameworks/python/) |
+| **TypeScript** | `@vaquarkhan/mcp-test-suite-jest` | [overview](docs/tutorials/typescript.md) · [Nest](docs/tutorials/nestjs.md) · [Express](docs/tutorials/express.md) · [Fastify](docs/tutorials/fastify.md) | [frameworks/typescript](examples/frameworks/typescript/) |
+| **Java** | `mcp-test-suite-junit5` | [overview](docs/tutorials/java.md) · [Spring Boot](docs/tutorials/spring-boot.md) · [Spring AI](docs/tutorials/spring-ai.md) · [Quarkus](docs/tutorials/quarkus.md) · [Micronaut](docs/tutorials/micronaut.md) | [frameworks/java](examples/frameworks/java/) |
+| **Kotlin** | `mcp-test-suite-junit5` | [overview](docs/tutorials/kotlin.md) · [Spring](docs/tutorials/kotlin-spring.md) · [Ktor](docs/tutorials/ktor.md) | [frameworks/kotlin](examples/frameworks/kotlin/) |
 | **Go** | `adapters/gotest` | [go](docs/tutorials/go.md) | [frameworks/go](examples/frameworks/go/) |
 | **.NET** | `McpTestSuite.Xunit` | [dotnet](docs/tutorials/dotnet.md) | [frameworks/dotnet](examples/frameworks/dotnet/) |
 | **Rust** | YAML + CLI | [rust](docs/tutorials/rust.md) | [frameworks/rust](examples/frameworks/rust/) |
+
+Full index: [docs/tutorials/README.md](docs/tutorials/README.md)
 
 ![Feature overview](./docs/images/feature-overview-suite.jpg)
 

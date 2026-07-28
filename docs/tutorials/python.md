@@ -1,35 +1,35 @@
-# Tutorial: Python (FastMCP / FastAPI)
+# Tutorial: Python (overview)
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
-[Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
 [Install guide](../DOWNLOADS.md)
+
+Python teams can use **declarative YAML** (`mcp-suite`) and/or the **engine API** (`mcp-test` + assertions).
+
+## Framework tutorials
+
+| Stack | Tutorial |
+|-------|----------|
+| FastMCP | [fastmcp.md](fastmcp.md) |
+| FastAPI | [fastapi.md](fastapi.md) |
+| YAML only | [yaml.md](yaml.md) |
 
 ## Install
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
-# or: pip install .   # from a clone
 ```
 
-## Path A — declarative (recommended for shared contracts)
+## Path A — declarative
 
 ```bash
-mcp-suite run --suite examples/frameworks/python/fastmcp/mcp-suite.yaml \
-  --server-command "python -m your_package.server"
+mcp-suite run --suite mcp-suite.yaml --server-command "python server.py"
 ```
 
-See [examples/frameworks/python/](../../examples/frameworks/python/).
-
-## Path B — Python API (engine)
+## Path B — engine API
 
 ```python
-# tests/test_weather.py
 from mcp_test_harness import assert_tool_call, assert_capabilities
 
 async def test_echo(mcp_server):
@@ -38,13 +38,7 @@ async def test_echo(mcp_server):
 ```
 
 ```bash
-mcp-test --server-command "python your_server.py" tests/
+mcp-test --server-command "python server.py" tests/
 ```
 
-(`mcp-test` comes from the PyPI engine; `mcp-suite` adds YAML `run`.)
-
-## Verify e2e locally
-
-```bash
-pytest tests/e2e/test_declarative_e2e.py -q
-```
+Examples: [examples/frameworks/python/](../../examples/frameworks/python/)

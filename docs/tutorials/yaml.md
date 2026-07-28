@@ -2,20 +2,20 @@
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
+[Java / Maven](https://github.com/vaquarkhan/mcp-test-suite/packages/3158511) ·
+[Node / npm](https://github.com/users/vaquarkhan/packages/npm/package/mcp-test-suite-jest) ·
 [Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
+[.NET / NuGet](https://github.com/users/vaquarkhan/packages/nuget/package/McpTestSuite.Xunit) ·
 [Install guide](../DOWNLOADS.md)
 
-Write contracts once in `mcp-suite.yaml`. Every adapter and CI job reuses this file.
+Write contracts once in `mcp-suite.yaml`. Every adapter and CI job reuses this file — no language-specific test code required for HTML / JUnit / JSON / SARIF reports.
 
-## 1. Install connectors + engine
+## 1. Install
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
-pip install .   # mcp-test-suite root
+pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+mcp-suite --version
 ```
 
 ## 2. Create `mcp-suite.yaml`
@@ -31,45 +31,56 @@ cases:
     args: { text: hello }
     tags: [smoke]
 
+  - name: Echo latency budget
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 5000
+    tags: [perf]
+
   - name: Unknown tool fails
     call: __does_not_exist__
     args: {}
     expect_error: true
+    tags: [negative]
 ```
 
-## 3. Run (with the same reports Python teams use)
+## 3. Run
 
 ```bash
 mcp-suite run --suite mcp-suite.yaml
-
-# HTML dashboard / interactive report (engine feature — any language)
-mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report.html
-
-# list cases without executing:
 mcp-suite run --suite mcp-suite.yaml --list
+mcp-suite run --suite mcp-suite.yaml --report-format html --report-output report.html
+mcp-suite run --suite mcp-suite.yaml --report-format junit --report-output junit.xml
 ```
 
-You do **not** need Python `test_*.py` to get the HTML dashboard, JUnit, JSON, or SARIF — those come from the shared engine when you run `mcp-suite`.
+Probe without a suite file:
+
+```bash
+mcp-test try --server-command "node dist/server.js"
+```
 
 ## 4. CI
 
 ```yaml
-- uses: ./   # or vaquarkhan/mcp-test-suite
+- uses: vaquarkhan/mcp-test-suite@init
   with:
     suite-file: mcp-suite.yaml
+    server-command: "node dist/server.js"
 ```
 
-## Case fields (cheat sheet)
+## Case fields
 
 | Field | Meaning |
 |-------|---------|
 | `call` / `tool` | Tool name |
 | `args` | Tool arguments |
-| `expected` | Exact / partial expected payload |
+| `expected` | Expected payload |
 | `assert_schema` | Named schema under `schemas:` |
 | `max_latency_ms` | Latency budget |
-| `expect_error` | Tool must fail |
+| `expect_error` | Tool/protocol must fail |
 | `resource` / `prompt` | Resource read or prompt get |
-| `tags` | Filter with `-m` |
+| `tags` | Filter / CI grouping |
 
-Full example: [../../examples/declarative/](../../examples/declarative/)
+## Next
+
+Pick your stack: [README.md](README.md) · Full example: [examples/declarative/](../../examples/declarative/)

@@ -14,7 +14,7 @@
 | Doc | Topic |
 |-----|--------|
 | [QUICK_START.md](QUICK_START.md) | First green `mcp-suite run` |
-| [tutorials/](tutorials/) | Per-language walkthroughs |
+| [tutorials/](tutorials/) | Per-language + framework walkthroughs (Spring, Nest, FastMCP, …) |
 | [MULTI_LANGUAGE.md](MULTI_LANGUAGE.md) | Adapters + architecture |
 | [DOCKER.md](DOCKER.md) | Suite OCI image (PyPI engine) |
 | [DOWNLOADS.md](DOWNLOADS.md) | GitHub Packages + Releases (Maven / npm / NuGet / Go) |

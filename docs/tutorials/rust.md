@@ -2,23 +2,43 @@
 
 **Package downloads (v4.0.0):**
 [Python / PyPI](https://pypi.org/project/mcp-test-harness/) ·
-[Java JAR](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/mcp-test-suite-junit5-4.0.0.jar) ·
-[Node / npm tgz](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/vaquarkhan-mcp-test-suite-jest-4.0.0.tgz) ·
-[Go module](https://pkg.go.dev/github.com/vaquarkhan/mcp-test-suite/adapters/gotest@v4.0.0) ·
-[.NET nupkg](https://github.com/vaquarkhan/mcp-test-suite/releases/download/v4.0.0/McpTestSuite.Xunit.4.0.0.nupkg) ·
-[All release assets](https://github.com/vaquarkhan/mcp-test-suite/releases/tag/v4.0.0) ·
 [Install guide](../DOWNLOADS.md)
 
-Rust packs use the shared YAML file and shell out to `mcp-suite` from an integration test (no separate Rust MCP client required).
+Rust packs use shared YAML and shell out to **`mcp-suite`** from an integration test (no separate Rust MCP client required).
 
-## Install
+Example pack: [examples/frameworks/rust/](../../examples/frameworks/rust/)
+
+## 1. Install
 
 ```bash
 pip install "mcp-test-harness>=3.0.9"
 pip install "git+https://github.com/vaquarkhan/mcp-test-suite.git"
+mcp-suite --version
 ```
 
-## Integration test sketch
+## 2. Suite
+
+```yaml
+server:
+  command: target/release/my_mcp_server
+  transport: stdio
+cases:
+  - name: Echo
+    call: echo
+    args: { text: hello-rust }
+    tags: [smoke, rust]
+```
+
+## 3. Run (CLI)
+
+```bash
+cargo build --release
+mcp-suite run --suite mcp-suite.yaml \
+  --server-command "target/release/my_mcp_server"
+mcp-test try --server-command "target/release/my_mcp_server"
+```
+
+## 4. Integration test sketch
 
 ```rust
 #[test]
@@ -37,4 +57,15 @@ fn mcp_suite() {
 }
 ```
 
-Example: [examples/frameworks/rust/](../../examples/frameworks/rust/)
+```bash
+cargo test
+```
+
+## Rust notes
+
+- Use a release binary in CI for stable boot times.
+- Logs → stderr only on stdio.
+
+## Related
+
+- [yaml.md](yaml.md)
