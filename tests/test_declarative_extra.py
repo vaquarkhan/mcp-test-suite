@@ -238,20 +238,26 @@ def test_build_case_latency_budget_exceeded(monkeypatch):
     )
     schemas = {"Echo": {"type": "object"}}
 
-    real_monotonic = time.monotonic
-    values = iter([100.0, 100.5])  # 500ms elapsed
+    clock = {"t": 100.0}
 
     def fake_monotonic():
-        try:
-            return next(values)
-        except StopIteration:
-            return real_monotonic()
+        clock["t"] += 0.5  # each call advances 500ms
+        return clock["t"]
 
     monkeypatch.setattr(time, "monotonic", fake_monotonic)
     monkeypatch.setattr(
         "mcp_test_suite.declarative._validate_against_named_schema",
         lambda *a, **k: None,
     )
+    # Avoid assert_tool_call consuming the clock with its own timing helpers.
+    async def fake_tool_call(*_a, **_k):
+        class R:
+            content = []
+            isError = False
+
+        return R()
+
+    monkeypatch.setattr("mcp_test_suite.declarative.assert_tool_call", fake_tool_call)
 
     with pytest.raises(MCPAssertionError, match="latency"):
         asyncio.run(_build_case_func(case, schemas)(Session()))
