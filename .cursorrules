@@ -1,0 +1,8 @@
+# MCP Server Testing — Cursor agent rules (mcp-test-suite)
+
+When adding or modifying MCP tools, resources, or prompts:
+1. Always run tests before finalizing: `mcp-test run --suite mcp-suite.yaml` or `mcp-test --config mcp-test.yaml`
+2. New tools: `mcp-test try --server-command "<command>"` first
+3. Prefer declarative `mcp-suite.yaml` for cross-language contracts; Python tests for complex flows
+4. No stdout pollution on stdio servers (logs → stderr only)
+5. Green `mcp-test try` required before adding the server to `.cursor/mcp.json`

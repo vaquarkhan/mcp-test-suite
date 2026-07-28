@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>MCP Test Report</title>
+<style>
+:root {
+  --bg0: #070b12;
+  --bg1: #0d1320;
+  --panel: #121a2b;
+  --panel2: #1a2438;
+  --border: #2a3650;
+  --text: #eef2f7;
+  --muted: #8fa3bf;
+  --accent: #3b82f6;
+  --glow: rgba(59,130,246,.15);
+  --c-pass: #22c55e;
+  --c-fail: #ef4444;
+  --c-err: #f59e0b;
+  --c-skip: #94a3b8;
+  --c-to: #a855f7;
+  --radius: 14px;
+  --shadow: 0 8px 32px rgba(0,0,0,.45);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+  background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a2a4a 0%, var(--bg0) 55%);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+.wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
+.hero {
+  text-align: center;
+  padding: 2rem 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(59,130,246,.12) 0%, rgba(34,197,94,.08) 100%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #fff 0%, #93c5fd 50%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .tagline { color: var(--muted); margin: 0.5rem 0 1rem; font-size: 1rem; }
+.hero-meta {
+  display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; justify-content: center;
+  align-items: center; font-size: 0.8rem; color: var(--muted);
+}
+.badge-top {
+  display: inline-block; padding: 0.45rem 1rem; border-radius: 999px;
+  font-weight: 800; font-size: 0.85rem; letter-spacing: 0.06em;
+}
+.exit-pass { background: rgba(34,197,94,.2); color: #4ade80; border: 1px solid rgba(34,197,94,.45); }
+.exit-fail { background: rgba(239,68,68,.18); color: #f87171; border: 1px solid rgba(239,68,68,.4); }
+.exit-neu { background: var(--panel2); color: var(--muted); border: 1px solid var(--border); }
+.section-title { margin: 0 0 0.25rem; font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
+.section-sub { margin: 0 0 1rem; color: var(--muted); font-size: 0.88rem; }
+.formats-strip {
+  margin-bottom: 1.25rem; padding: 1.1rem; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.formats-export-hint { margin: 0.85rem 0 0; font-size: 0.72rem; color: var(--muted); }
+.formats-export-hint code { font-size: 0.68rem; color: #93c5fd; }
+.fmt-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.65rem; }
+@media (max-width: 900px) { .fmt-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .fmt-grid { grid-template-columns: 1fr; } }
+.fmt-card {
+  border-radius: 10px; padding: 0.75rem; border: 1px solid var(--border);
+  background: var(--panel2); min-height: 8rem;
+}
+.fmt-card-link {
+  display: block; text-decoration: none; color: inherit; cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.fmt-card-link:hover { border-color: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,.25); }
+.fmt-card-expand { padding: 0; }
+.fmt-card-expand > summary.fmt-card-sum {
+  list-style: none; cursor: pointer; padding: 0.75rem; border-radius: 10px;
+}
+.fmt-card-expand > summary.fmt-card-sum::-webkit-details-marker { display: none; }
+.fmt-card-expand[open] > summary.fmt-card-sum { border-bottom: 1px solid var(--border); }
+.fmt-card-expand[open] { border-color: #3b82f6; }
+.fmt-expand-hint, .fmt-link-hint {
+  display: block; font-size: 0.62rem; color: #93c5fd; margin-top: 0.35rem; font-weight: 600;
+}
+.fmt-full {
+  padding: 0.5rem 0.75rem 0.75rem; max-height: 22rem; overflow: auto;
+}
+.fmt-full pre {
+  margin: 0; font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 0.6rem; line-height: 1.4; color: #a8c5e8; white-space: pre-wrap; word-break: break-word;
+}
+.fmt-head { font-weight: 700; font-size: 0.82rem; margin-bottom: 0.15rem; }
+.fmt-sub { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.5rem; }
+.fmt-preview pre {
+  display: block; margin: 0; font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 0.62rem; line-height: 1.45; color: #a8c5e8; white-space: pre-wrap;
+  word-break: break-word; max-height: 9rem; overflow: auto;
+}
+.fmt-console { border-top: 3px solid #64748b; }
+.fmt-junit { border-top: 3px solid #f59e0b; }
+.fmt-json { border-top: 3px solid #3b82f6; }
+.fmt-html { border-top: 3px solid #22c55e; }
+.t-pass { color: var(--c-pass); font-weight: 700; }
+.t-fail { color: var(--c-fail); font-weight: 700; }
+.t-dim { color: #64748b; }
+.quality {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1rem;
+  border-radius: var(--radius); font-weight: 600; font-size: 0.9rem;
+  margin-bottom: 1rem; border: 1px solid var(--border);
+}
+.quality.ok { background: rgba(34,197,94,.1); color: var(--c-pass); border-color: rgba(34,197,94,.3); }
+.quality.bad { background: rgba(239,68,68,.1); color: var(--c-fail); border-color: rgba(239,68,68,.3); }
+.quality.neutral { background: var(--panel2); color: var(--muted); }
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat-card {
+  display: flex; align-items: center; gap: 0.85rem;
+  padding: 1rem 1.1rem; border-radius: var(--radius);
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: var(--shadow); transition: transform .15s;
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-icon {
+  width: 2.5rem; height: 2.5rem; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stat-icon svg { width: 1.25rem; height: 1.25rem; }
+.sc-pass .stat-icon { background: rgba(34,197,94,.15); color: var(--c-pass); }
+.sc-fail .stat-icon { background: rgba(239,68,68,.15); color: var(--c-fail); }
+.sc-skip .stat-icon { background: rgba(148,163,184,.15); color: var(--c-skip); }
+.sc-time .stat-icon { background: rgba(59,130,246,.15); color: #60a5fa; }
+.stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.stat-value { font-size: 1.75rem; font-weight: 800; font-feature-settings: "tnum"; line-height: 1.1; }
+.sc-pass .stat-value { color: var(--c-pass); }
+.sc-fail .stat-value { color: var(--c-fail); }
+.sc-skip .stat-value { color: var(--c-skip); }
+.sc-time .stat-value { color: #60a5fa; font-size: 1.35rem; }
+.analytics {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem;
+}
+@media (max-width: 900px) { .analytics { grid-template-columns: 1fr; } }
+.analytics-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem; box-shadow: var(--shadow);
+}
+.analytics-card h3 { margin: 0 0 0.5rem; font-size: 0.85rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.05em; }
+.chart-hint { font-size: 0.72rem; color: var(--muted); margin: 0 0 0.5rem; }
+.chart-card { grid-column: span 1; }
+.donut-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; justify-content: center; }
+.donut-outer {
+  width: 140px; height: 140px; border-radius: 50%; position: relative;
+  box-shadow: 0 0 24px rgba(34,197,94,.2);
+}
+.donut-inner {
+  position: absolute; inset: 18px; border-radius: 50%;
+  background: var(--panel); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; border: 1px solid var(--border);
+}
+.donut-pct { font-size: 1.5rem; font-weight: 800; color: var(--c-pass); line-height: 1; }
+.donut-sub { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.pie-legend { flex: 1; min-width: 140px; }
+.leg-row { display: grid; grid-template-columns: 10px 1fr auto auto; gap: 0.4rem 0.5rem; align-items: center; font-size: 0.78rem; padding: 0.2rem 0; }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+.leg-name { color: #cbd5e1; }
+.leg-pct { color: var(--muted); font-feature-settings: "tnum"; }
+.leg-n { font-weight: 700; font-feature-settings: "tnum"; }
+.timeline-svg { width: 100%; height: auto; display: block; }
+.fail-list { list-style: none; margin: 0; padding: 0; }
+.fail-item { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.fail-item:last-child { border-bottom: none; }
+.fail-name { font-weight: 600; font-size: 0.82rem; color: #e2e8f0; }
+.fail-badge { font-size: 0.6rem; margin-left: 0.35rem; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(239,68,68,.2); color: var(--c-fail); }
+.fail-msg { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; word-break: break-word; }
+.fail-more { font-size: 0.75rem; color: var(--muted); padding-top: 0.35rem; }
+.good-note { color: var(--c-pass); font-size: 0.85rem; }
+.dur-chart { display: flex; flex-direction: column; gap: 0.45rem; }
+.dur-row { display: grid; grid-template-columns: minmax(0,1fr) 2fr auto; gap: 0.5rem; align-items: center; font-size: 0.72rem; }
+.dur-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #94a3b8; }
+.dur-track { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+.dur-fill { height: 100%; border-radius: 4px; }
+.dur-pass { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.dur-fail { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.dur-error { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.dur-skip { background: #64748b; }
+.dur-timeout { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+.dur-ms { color: var(--muted); font-feature-settings: "tnum"; white-space: nowrap; }
+.filter-row { margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.filter-row input[type="search"] {
+  flex: 1; min-width: 200px; padding: 0.55rem 0.85rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--panel2); color: var(--text); font-size: 0.9rem;
+}
+.filter-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.date-filters {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.75rem;
+  width: 100%; margin-top: 0.35rem; padding-top: 0.5rem; border-top: 1px dashed var(--border);
+}
+.date-filters label { font-size: 0.72rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+.date-filters input[type="datetime-local"] {
+  padding: 0.35rem 0.45rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel2); color: var(--text); font-size: 0.75rem;
+}
+.date-filters input[type="datetime-local"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn-date-clear {
+  padding: 0.3rem 0.6rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel2); color: var(--muted); font-size: 0.72rem; cursor: pointer;
+}
+.btn-date-clear:hover { border-color: #64748b; color: var(--text); }
+.date-run-hint { font-size: 0.68rem; color: var(--muted); }
+td.started { font-size: 0.72rem; color: #94a3b8; white-space: nowrap; font-feature-settings: "tnum"; }
+th.mcp-sort-started { cursor: pointer; user-select: none; text-decoration: underline dotted; text-underline-offset: 2px; }
+.filter-summary {
+  width: 100%; font-size: 0.78rem; color: #93c5fd; padding: 0.35rem 0.5rem;
+  background: rgba(59,130,246,.08); border-radius: 8px; border: 1px solid rgba(59,130,246,.2);
+}
+.filter-summary.filtered { color: #fbbf24; border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.08); }
+.dur-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.75rem; }
+.dur-filters label { font-size: 0.72rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.35rem; }
+.dur-filters input[type="number"] {
+  width: 5.5rem; padding: 0.35rem 0.45rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel2); color: var(--text); font-size: 0.75rem;
+}
+.btn-tool {
+  padding: 0.45rem 0.75rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel2); color: #cbd5e1; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+}
+.btn-tool:hover { border-color: #64748b; color: var(--text); }
+.kbd-hint { font-size: 0.65rem; color: var(--muted); margin-left: auto; }
+.kbd-hint kbd {
+  padding: 0.1rem 0.35rem; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--panel2); font-family: inherit; font-size: 0.62rem;
+}
+.shortcut-toast {
+  position: fixed; bottom: 1.25rem; right: 1.25rem; max-width: 320px; padding: 0.85rem 1rem;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow); font-size: 0.75rem; color: var(--text); z-index: 9999;
+  display: none; line-height: 1.55;
+}
+.shortcut-toast.show { display: block; }
+html[data-theme="light"] {
+  --bg0: #f8fafc; --bg1: #f1f5f9; --panel: #ffffff; --panel2: #f8fafc;
+  --border: #cbd5e1; --text: #0f172a; --muted: #64748b;
+  --glow: rgba(59,130,246,.08);
+}
+html[data-theme="light"] body {
+  background: radial-gradient(ellipse 120% 80% at 50% -20%, #e0e7ff 0%, var(--bg0) 55%);
+}
+html[data-theme="light"] .hero h1 {
+  background: linear-gradient(135deg, #1e293b 0%, #6366f1 50%, #059669 100%);
+  -webkit-background-clip: text; background-clip: text;
+}
+html[data-theme="light"] .brand-nav a,
+html[data-theme="light"] footer a { color: #2563eb; }
+html[data-theme="light"] .fail-name,
+html[data-theme="light"] td.name { color: #1e293b; }
+html[data-theme="light"] .dur-track { background: #e2e8f0; }
+html[data-theme="light"] .stat-grid.filtered .stat-value { opacity: 0.85; }
+.muted { color: var(--muted); }
+.portal { margin-bottom: 1.2rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.portal h2 { margin: 0 0 0.75rem; font-size: 0.95rem; color: #e2e8f0; }
+.portal-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.5rem; }
+@media (max-width: 800px) { .portal-grid { grid-template-columns: repeat(2, 1fr); } }
+.portal-card { border-radius: 8px; padding: 0.65rem; border: 1px solid var(--border); background: var(--panel2); }
+.portal-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.portal-score { font-size: 1.4rem; font-weight: 800; margin: 0.2rem 0; }
+.portal-sub { font-size: 0.72rem; color: var(--muted); }
+.portal-pass .portal-score { color: var(--c-pass); }
+.portal-fail .portal-score { color: var(--c-fail); }
+.portal-na .portal-score { color: var(--muted); }
+.portal-cov { font-size: 0.8rem; color: #94a3b8; margin: 0.75rem 0 0.25rem; }
+.portal-gaps { margin: 0.35rem 0 0; padding-left: 1.2rem; font-size: 0.75rem; color: #94a3b8; }
+.srv-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+@media (max-width: 800px) { .srv-panels { grid-template-columns: 1fr; } }
+.panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.75rem 1rem; font-size: 0.8rem; color: var(--muted);
+}
+.panel h3 { margin: 0 0 0.5rem; font-size: 0.8rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.05em; }
+.env-list { margin: 0; padding-left: 1.1rem; } .env-list code { font-size: 0.75rem; color: #a8c5e8; word-break: break-all; }
+.results-head { font-size: 1rem; margin: 0 0 0.65rem; color: #94a3b8; font-weight: 600; }
+.trace-block{margin-top:.5rem;border:1px solid var(--border);border-radius:6px;padding:.5rem;background:var(--bg1)}
+.trace-row{display:grid;grid-template-columns:4rem 4.5rem 1fr 3rem;gap:.35rem .5rem;align-items:start;padding:.25rem 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.trace-row:last-child{border-bottom:none}
+.trace-payload{grid-column:1/-1;margin:.2rem 0 0;font-size:.72rem;max-height:8rem;overflow:auto;white-space:pre-wrap}
+.trace-request .trace-dir{color:#5dade2}
+.trace-response .trace-dir{color:#1abc7a}
+.trace-error .trace-dir{color:#e74c3c}
+.pollution,.pollution-head{color:#e67e22}
+.pollution-head{font-size:.75rem;margin:.25rem 0}
+.file-block { margin-bottom: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.file-sum {
+  font-weight: 600; font-size: 0.88rem; padding: 0.55rem 0.8rem; cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 0.4rem; color: #cbd5e1;
+}
+.file-sum::-webkit-details-marker { display: none; } .file-sum::before { content: "▸"; color: var(--accent); font-size: 0.75rem; }
+.file-block[open] > .file-sum::before { content: "▾"; }
+.file-sum .n { font-weight: 400; color: var(--muted); font-size: 0.8rem; }
+.inner-table { padding: 0 0.5rem 0.6rem; overflow-x: auto; }
+table.results { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 640px; }
+table.results th {
+  text-align: left; padding: 0.5rem 0.5rem; background: var(--panel2); color: var(--muted);
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border);
+}
+th.mcp-sort-dur { cursor: pointer; user-select: none; text-decoration: underline dotted; text-underline-offset: 2px; }
+table.results td { padding: 0.5rem; border-bottom: 1px solid #2a3344; vertical-align: top; }
+tr.mcp-trow:hover { background: rgba(59, 130, 246, 0.06); }
+td.name { font-weight: 500; color: #e2e8f0; }
+.tagchip { display: inline-block; font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 3px; background: #2d3f5c; color: #94c5f8; margin: 0.1rem 0.1rem 0 0; }
+.badge { display: inline-block; padding: 0.12rem 0.45rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; }
+.badge.b-pass { background: rgba(34,197,94,.2); color: var(--c-pass); }
+.badge.b-fail { background: rgba(239,68,68,.2); color: var(--c-fail); }
+.badge.b-error { background: rgba(245,158,11,.2); color: var(--c-err); }
+.badge.b-timeout { background: rgba(168,85,247,.2); color: var(--c-to); }
+.badge.b-skip { background: rgba(148,163,184,.25); color: #b0b8bb; }
+.flaky-pill { font-size: 0.6rem; color: #fbbf24; font-weight: 700; margin-left: 0.3rem; }
+td.num { text-align: right; font-feature-settings: "tnum"; color: #94a3b8; font-size: 0.8rem; white-space: nowrap; }
+details.row-detail { max-width: 100%; } details.row-detail[open] summary { color: #93c5fd; }
+summary.row-dsum { cursor: pointer; font-size: 0.75rem; color: #64748b; list-style: none; }
+summary.row-dsum::-webkit-details-marker { display: none; }
+td.detail pre { margin: 0.35rem 0 0; white-space: pre-wrap; word-break: break-word; color: #94a3b8; font-size: 0.75rem; max-height: 18rem; overflow: auto; }
+.footer-bar {
+  margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius);
+  background: linear-gradient(90deg, rgba(34,197,94,.12), rgba(59,130,246,.12));
+  border: 1px solid var(--border); text-align: center;
+}
+.footer-bar strong { color: #e2e8f0; font-size: 0.9rem; letter-spacing: 0.04em; }
+.footer-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1rem; margin-top: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+footer { margin-top: 0.75rem; font-size: 0.72rem; color: var(--muted); text-align: center; }
+.feat-highlights,.cov-panel,.tags-panel,.diag-panel {
+  margin-bottom: 1.25rem; padding: 1.1rem; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.55rem; }
+.feat-chip {
+  text-align: center; padding: 0.65rem 0.4rem; border-radius: 10px;
+  background: var(--panel2); border: 1px solid var(--border);
+}
+.feat-val { display: block; font-size: 1.35rem; font-weight: 800; line-height: 1.1; }
+.feat-lbl { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 0.2rem; }
+.feat-sec .feat-val { color: #f87171; } .feat-perf .feat-val { color: #60a5fa; }
+.feat-res .feat-val { color: #a78bfa; } .feat-trace .feat-val { color: #2dd4bf; }
+.feat-flaky .feat-val { color: #fbbf24; } .feat-schema .feat-val { color: #fb923c; }
+.cov-blocks { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0.75rem; }
+@media (max-width: 900px) { .cov-blocks { grid-template-columns: 1fr; } }
+.cov-block { background: var(--panel2); border-radius: 10px; padding: 0.75rem; border: 1px solid var(--border); }
+.cov-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
+.cov-bar-track { flex: 1; height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; max-width: 100px; }
+.cov-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); border-radius: 3px; }
+.cov-bar-pct { font-size: 0.72rem; color: var(--muted); font-feature-settings: "tnum"; white-space: nowrap; }
+.cov-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.cov-chip {
+  font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 999px;
+  border: 1px solid var(--border); background: #0f172a;
+}
+.cov-chip.cov-ok { border-color: rgba(34,197,94,.45); color: #86efac; }
+.cov-chip.cov-gap { border-color: rgba(239,68,68,.4); color: #fca5a5; }
+.cov-chip.cov-more { color: var(--muted); }
+.cov-gap-note { font-size: 0.72rem; margin: 0.45rem 0 0; color: #fca5a5; }
+.cov-ok-note { color: var(--c-pass) !important; }
+.cov-auth { font-size: 0.8rem; color: #94a3b8; margin: 0 0 0.75rem; }
+.cov-warn { color: #fbbf24; }
+.tags-table-wrap { overflow-x: auto; }
+.tags-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.tags-table th { text-align: left; padding: 0.45rem; color: var(--muted); font-size: 0.65rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.tags-table td { padding: 0.45rem; border-bottom: 1px solid #1e293b; vertical-align: middle; }
+.tags-table .fail-n { color: #f87171; }
+.tag-bar { display: inline-block; width: 80px; height: 6px; background: #1e293b; border-radius: 3px; vertical-align: middle; margin-right: 0.35rem; }
+.tag-bar-fill { height: 100%; background: #22c55e; border-radius: 3px; }
+.tag-rate { font-size: 0.72rem; color: var(--muted); }
+.diag-cols { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0.75rem; }
+@media (max-width: 800px) { .diag-cols { grid-template-columns: 1fr; } }
+.diag-col h4 { margin: 0 0 0.4rem; font-size: 0.78rem; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.04em; }
+.diag-list { margin: 0; padding-left: 1rem; font-size: 0.78rem; }
+.diag-list a { color: #93c5fd; text-decoration: none; }
+.diag-list a:hover { text-decoration: underline; }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.filter-chip {
+  padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--panel2); color: var(--muted);
+  cursor: pointer; user-select: none;
+}
+.filter-chip.active { background: rgba(59,130,246,.2); border-color: #3b82f6; color: #93c5fd; }
+.filter-chip:hover { border-color: #64748b; }
+.platform-panel {
+  margin-bottom: 1.25rem; padding: 1.1rem; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.platform-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 0.65rem; }
+.platform-table th { text-align: left; padding: 0.45rem; color: var(--muted); font-size: 0.62rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.platform-table td { padding: 0.45rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+.platform-table a { color: #93c5fd; text-decoration: none; }
+.chaos-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.5rem 0; }
+.chaos-pill {
+  font-size: 0.65rem; padding: 0.2rem 0.5rem; border-radius: 999px;
+  background: rgba(168,85,247,.15); border: 1px solid rgba(168,85,247,.35); color: #d8b4fe;
+}
+.chaos-faults { font-size: 0.72rem; color: #fbbf24; }
+.pct-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; margin: 0.65rem 0; }
+.pct-card {
+  text-align: center; padding: 0.65rem; border-radius: 10px;
+  background: var(--panel2); border: 1px solid var(--border);
+}
+.pct-k { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.pct-v { font-size: 1.35rem; font-weight: 800; color: #60a5fa; }
+.pct-u { font-size: 0.65rem; font-weight: 400; color: var(--muted); }
+.load-note { font-size: 0.75rem; margin: 0.35rem 0 0.5rem; }
+.slo-hint { font-size: 0.68rem; color: #fca5a5; margin-top: 0.15rem; }
+.bastion-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+@media (max-width: 900px) { .bastion-split { grid-template-columns: 1fr; } }
+.bastion-col-card {
+  background: var(--panel2); border-radius: 12px; padding: 0.85rem; border: 1px solid var(--border);
+}
+.bastion-col-card h3 { margin: 0 0 0.5rem; font-size: 0.82rem; color: #e2e8f0; }
+.ci-card { border-top: 3px solid #3b82f6; }
+.prod-card { border-top: 3px solid #a855f7; }
+.bastion-ver { font-size: 0.78rem; color: #94a3b8; margin: 0 0 0.5rem; }
+.findings-list { list-style: none; margin: 0; padding: 0; }
+.finding-item { padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.75rem; }
+.finding-rule { font-family: Consolas, monospace; color: #fbbf24; }
+.finding-sev { font-size: 0.6rem; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(239,68,68,.2); color: #fca5a5; }
+.finding-msg { color: var(--muted); margin-top: 0.15rem; }
+.bastion-cta { font-size: 0.72rem; margin-top: 0.5rem; }
+.pair-table { width: 100%; font-size: 0.72rem; border-collapse: collapse; }
+.pair-table th, .pair-table td { padding: 0.35rem 0.25rem; border-bottom: 1px solid #1e293b; text-align: left; }
+.pair-table .bastion-col { color: #c4b5fd; }
+.bastion-install { font-size: 0.75rem; margin: 0.65rem 0 0; color: #94a3b8; }
+.bastion-install a { color: #93c5fd; }
+.toolkit-panel {
+  margin-bottom: 1.25rem; padding: 1.1rem; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.toolkit-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0.55rem; }
+@media (max-width: 700px) { .toolkit-grid { grid-template-columns: repeat(2, 1fr); } }
+.toolkit-card {
+  padding: 0.75rem; border-radius: 10px; background: var(--panel2); border: 1px solid var(--border);
+  border-left: 3px solid #64748b;
+}
+.toolkit-chaos { border-left-color: #a855f7; }
+.toolkit-perf { border-left-color: #3b82f6; }
+.toolkit-sec { border-left-color: #ef4444; }
+.toolkit-res { border-left-color: #22c55e; }
+.toolkit-reg { border-left-color: #f59e0b; }
+.toolkit-trace { border-left-color: #2dd4bf; }
+.toolkit-n { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.toolkit-title { font-size: 0.78rem; font-weight: 600; margin-top: 0.25rem; }
+.toolkit-sub { font-size: 0.62rem; color: var(--muted); margin-top: 0.15rem; }
+.product-brand {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem;
+  margin-bottom: 1rem; padding: 0.65rem 1rem; background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.brand-link {
+  display: inline-flex; align-items: center; gap: 0.55rem; color: var(--text);
+  text-decoration: none; font-weight: 700; font-size: 0.95rem;
+}
+.brand-link:hover { color: #93c5fd; }
+.brand-logo { flex-shrink: 0; display: block; }
+.brand-ver {
+  font-size: 0.65rem; font-weight: 600; color: var(--muted);
+  padding: 0.12rem 0.4rem; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--panel2);
+}
+.brand-nav { display: flex; flex-wrap: wrap; gap: 0.65rem 1rem; font-size: 0.78rem; }
+.brand-nav a { color: #93c5fd; text-decoration: none; }
+.brand-nav a:hover { text-decoration: underline; }
+.brand-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; margin-left: auto; }
+.btn-pdf {
+  padding: 0.45rem 0.85rem; border-radius: 8px; border: 1px solid #6366f1;
+  background: linear-gradient(135deg, rgba(99,102,241,.25), rgba(16,185,129,.15));
+  color: #e0e7ff; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+}
+.btn-pdf:hover { border-color: #818cf8; background: rgba(99,102,241,.35); }
+@media (max-width: 640px) { .brand-actions { margin-left: 0; width: 100%; } }
+footer a { color: #93c5fd; text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media print {
+  :root { --bg0: #fff; --bg1: #f8fafc; --panel: #fff; --panel2: #f1f5f9; --border: #cbd5e1;
+    --text: #0f172a; --muted: #475569; }
+  body { background: #fff !important; color: #0f172a; font-size: 10pt; }
+  .wrap { max-width: none; padding: 0; }
+  .no-print, .filter-row, .filter-chips, .btn-pdf, .brand-nav { display: none !important; }
+  .product-brand { border: none; box-shadow: none; padding: 0 0 0.75rem; margin-bottom: 0.5rem;
+    border-bottom: 2px solid #6366f1; page-break-after: avoid; }
+  .brand-link { color: #0f172a; text-decoration: none; }
+  .brand-ver { color: #64748b; }
+  .hero { padding: 0.5rem 0 1rem; page-break-after: avoid; }
+  .stat-grid, .analytics-grid, .formats-strip, .quality, .feat-highlights,
+  .toolkit-panel, .platform-panel, .portal-panel, .cov-panel, .tags-panel, .diag-panel {
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .stat-card, .pie-wrap, .chart-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .srv-panels, .results-head { page-break-before: auto; }
+  .file-block { page-break-inside: avoid; break-inside: avoid; }
+  details.file-block { open: true; }
+  table.results { font-size: 9pt; }
+  td.detail pre { max-height: none; overflow: visible; }
+  a { color: #2563eb; }
+  footer { font-size: 8pt; margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; }
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="product-brand"><a class="brand-link" href="https://vaquarkhan.github.io/mcp-test-harness/" target="_blank" rel="noopener noreferrer" title="MCP Test Harness product site"><svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" aria-hidden="true" focusable="false"><defs><linearGradient id="mth-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs><rect width="36" height="36" rx="9" fill="url(#mth-grad)"/><text x="18" y="23" text-anchor="middle" fill="#fff" font-family="Segoe UI,system-ui,sans-serif" font-size="13" font-weight="800">MT</text></svg><span class="brand-text">MCP Test Harness</span><span class="brand-ver">v3.0.9</span></a><nav class="brand-nav no-print" aria-label="Product links"><a href="https://vaquarkhan.github.io/mcp-test-harness/" target="_blank" rel="noopener noreferrer">Product site</a><a href="https://github.com/vaquarkhan/mcp-test-harness" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://pypi.org/project/mcp-test-harness/" target="_blank" rel="noopener noreferrer">PyPI</a></nav><div class="brand-actions no-print"><button type="button" class="btn-tool" id="mcp-theme-toggle" title="Toggle light/dark theme (t)">Theme</button><button type="button" class="btn-tool" id="mcp-export-csv" title="Download visible rows as CSV">Export CSV</button><button type="button" class="btn-pdf" id="mcp-export-pdf" title="Print-friendly summary — choose Save as PDF in the dialog">Save as PDF</button></div></div>
+  <header class="hero">
+    <h1>MCP Test Report</h1>
+    <p class="tagline">One test run. Multiple formats. Complete visibility.</p>
+    <div class="hero-meta">
+      <span class="badge-top exit-fail">RUN FAILED</span>
+      <span>Harness <strong>3.0.9</strong><br>Protocol 2025-03-26</span>
+      <span>2026-07-06T20:10:00.000Z &rarr; 2026-07-06T20:10:02.340Z</span>
+    </div>
+  </header>
+  <section class="formats-strip" id="mcp-formats-strip"><h2 class="section-title">Test report outputs</h2><p class="section-sub">One test run. Multiple formats. Complete visibility. <span class="muted">Click a card to expand full Console, JUnit, or JSON output.</span></p><div class="fmt-grid"><details class="fmt-card fmt-card-expand fmt-console"><summary class="fmt-card-sum"><span class="fmt-head">Console</span><span class="fmt-sub">Human-readable terminal output</span><span class="fmt-expand-hint">Click for full output</span><div class="fmt-preview"><pre>  PASS  test_echo_tool_returns_message  (12.4ms)
+  PASS  test_tool_schema_matches_openapi  (48.2ms)
+  PASS  test_list_tools_includes_echo  (6.8ms)
+  FAIL  test_echo_rejects_empty_payload  (31.5ms)
+      Tool &#x27;echo&#x27; response mismatch
+      --- expected
+…</pre></div></summary><div class="fmt-full"><pre>  PASS  test_echo_tool_returns_message  (12.4ms)
+  PASS  test_tool_schema_matches_openapi  (48.2ms)
+  PASS  test_list_tools_includes_echo  (6.8ms)
+  FAIL  test_echo_rejects_empty_payload  (31.5ms)
+      Tool &#x27;echo&#x27; response mismatch
+      --- expected
+      +++ actual
+      @@ -1,3 +1,3 @@
+       [{&quot;text&quot;: &quot;validation error&quot;, &quot;isError&quot;: true}]
+      +[{&quot;text&quot;: &quot;ok&quot;, &quot;isError&quot;: false}]
+  FAIL  test_report_snapshot_stable  (89.0ms)
+      Snapshot mismatch for &#x27;generate_report&#x27;
+      --- expected
+      +++ actual
+      - {&#x27;version&#x27;: &#x27;2.0.0&#x27;}
+      + {&#x27;version&#x27;: &#x27;2.0.1&#x27;}
+  PASS  test_tool_idempotent_calculate  (156.3ms)
+  PASS  test_injection_payloads_blocked  (420.7ms)
+  FAIL  test_no_secret_leak_in_logs  (55.1ms)
+      Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key
+  PASS  test_path_traversal_blocked  (210.4ms)
+  PASS  test_echo_latency_p95_under_slo  (1240.0ms)
+  FAIL  test_throughput_min_rps  (980.0ms)
+      Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)
+  PASS  test_degrades_gracefully_on_bad_args  (72.0ms)
+  PASS  test_chaos_delay_tolerance  (145.0ms)
+  FAIL  test_chaos_503_unavailable  (88.0ms)
+      ChaosFaultError: simulated 503 Service Unavailable
+  PASS  test_chaos_schema_drift_probe  (62.0ms)
+  ERR  test_survives_server_restart  (18.0ms)
+      ConnectionResetError: MCP server process exited with code 1
+      Traceback (most recent call last):
+        File tests/test_resiliency.py, line 44
+          await assert_tool_call(...)
+  PASS  test_flaky_resource_read  (340.0ms)
+      [!] flaky (passed on retry)
+  FAIL  test_schema_probe_strict  (44.0ms)
+      Schema validation failed for tool &#x27;search&#x27;
+  SKIP  test_prompts_when_available  (0.0ms)
+  SKIP  test_optional_bedrock_pack  (0.0ms)
+  TIME  test_long_running_export  (30000.0ms)
+
+11 passed, 6 failed, 1 errored, 2 skipped
+Total time: 2340.0ms
+
+========================================
+FAILURES
+--------------------
+tests/test_server.py
+  test_echo_rejects_empty_payload — Tool &#x27;echo&#x27; response mismatch
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ [{&quot;text&quot;: &quot;validation error&quot;, &quot;isError&quot;: true}]
++[{&quot;text&quot;: &quot;ok&quot;, &quot;isError&quot;: false}]
+--------------------
+tests/test_regression.py
+  test_report_snapshot_stable — Snapshot mismatch for &#x27;generate_report&#x27;
+--- expected
++++ actual
+- {&#x27;version&#x27;: &#x27;2.0.0&#x27;}
++ {&#x27;version&#x27;: &#x27;2.0.1&#x27;}
+--------------------
+tests/test_security.py
+  test_no_secret_leak_in_logs — Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key
+--------------------
+tests/test_performance.py
+  test_throughput_min_rps — Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)
+--------------------
+tests/test_resiliency.py
+  test_chaos_503_unavailable — ChaosFaultError: simulated 503 Service Unavailable
+--------------------
+tests/test_resiliency.py
+  test_survives_server_restart — ConnectionResetError: MCP server process exited with code 1
+Traceback (most recent call last):
+  File tests/test_resiliency.py, line 44
+    await assert_tool_call(...)
+--------------------
+tests/test_schema.py
+  test_schema_probe_strict — Schema validation failed for tool &#x27;search&#x27;
+--------------------
+tests/test_performance.py
+  test_long_running_export — Test exceeded timeout of 30000ms</pre></div></details><details class="fmt-card fmt-card-expand fmt-junit"><summary class="fmt-card-sum"><span class="fmt-head">JUnit XML</span><span class="fmt-sub">CI/CD integration</span><span class="fmt-expand-hint">Click for full output</span><div class="fmt-preview"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;testsuites&gt;
+  &lt;testsuite name=&quot;mcp-test&quot; tests=&quot;21&quot; failures=&quot;6&quot; errors=&quot;2&quot; skipped=&quot;2&quot; time=&quot;2.340&quot; timestamp=&quot;2026-07-06T20:10:02.340Z&quot; hostname=&quot;LAPTOP-UBC5B3VU&quot;&gt;
+    &lt;properties&gt;
+      &lt;property name=&quot;harness_version&quot; value=&quot;3.0.9&quot; /&gt;
+…</pre></div></summary><div class="fmt-full"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;testsuites&gt;
+  &lt;testsuite name=&quot;mcp-test&quot; tests=&quot;21&quot; failures=&quot;6&quot; errors=&quot;2&quot; skipped=&quot;2&quot; time=&quot;2.340&quot; timestamp=&quot;2026-07-06T20:10:02.340Z&quot; hostname=&quot;LAPTOP-UBC5B3VU&quot;&gt;
+    &lt;properties&gt;
+      &lt;property name=&quot;harness_version&quot; value=&quot;3.0.9&quot; /&gt;
+      &lt;property name=&quot;mcp_protocol_version&quot; value=&quot;2025-03-26&quot; /&gt;
+      &lt;property name=&quot;transport&quot; value=&quot;stdio&quot; /&gt;
+      &lt;property name=&quot;server_command&quot; value=&quot;python -m my_mcp_server --transport stdio&quot; /&gt;
+      &lt;property name=&quot;run_started_at&quot; value=&quot;2026-07-06T20:10:00.000Z&quot; /&gt;
+      &lt;property name=&quot;run_finished_at&quot; value=&quot;2026-07-06T20:10:02.340Z&quot; /&gt;
+    &lt;/properties&gt;
+    &lt;testcase name=&quot;test_echo_tool_returns_message&quot; classname=&quot;tests/test_server.py&quot; time=&quot;0.012&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;smoke&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;functional&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_tool_schema_matches_openapi&quot; classname=&quot;tests/test_server.py&quot; time=&quot;0.048&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;functional&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_list_tools_includes_echo&quot; classname=&quot;tests/test_server.py&quot; time=&quot;0.007&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;smoke&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_echo_rejects_empty_payload&quot; classname=&quot;tests/test_server.py&quot; time=&quot;0.032&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;functional&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;Tool &amp;apos;echo&amp;apos; response mismatch&quot;&gt;--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ [{&amp;quot;text&amp;quot;: &amp;quot;validation error&amp;quot;, &amp;quot;isError&amp;quot;: true}]
++[{&amp;quot;text&amp;quot;: &amp;quot;ok&amp;quot;, &amp;quot;isError&amp;quot;: false}]&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_report_snapshot_stable&quot; classname=&quot;tests/test_regression.py&quot; time=&quot;0.089&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;regression&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;snapshot&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;Snapshot mismatch for &amp;apos;generate_report&amp;apos;&quot;&gt;--- expected
++++ actual
+- {&amp;apos;version&amp;apos;: &amp;apos;2.0.0&amp;apos;}
++ {&amp;apos;version&amp;apos;: &amp;apos;2.0.1&amp;apos;}&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_tool_idempotent_calculate&quot; classname=&quot;tests/test_regression.py&quot; time=&quot;0.156&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;regression&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_injection_payloads_blocked&quot; classname=&quot;tests/test_security.py&quot; time=&quot;0.421&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;security&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_no_secret_leak_in_logs&quot; classname=&quot;tests/test_security.py&quot; time=&quot;0.055&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;security&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;Tool &amp;apos;get_config&amp;apos; output matched secret pattern(s): aws_key&quot;&gt;&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_path_traversal_blocked&quot; classname=&quot;tests/test_security.py&quot; time=&quot;0.210&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;security&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_echo_latency_p95_under_slo&quot; classname=&quot;tests/test_performance.py&quot; time=&quot;1.240&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;perf&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;latency&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_throughput_min_rps&quot; classname=&quot;tests/test_performance.py&quot; time=&quot;0.980&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;perf&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;throughput&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)&quot;&gt;&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_degrades_gracefully_on_bad_args&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.072&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;resiliency&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_chaos_delay_tolerance&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.145&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos:delay&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;resiliency&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_chaos_503_unavailable&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.088&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos:503&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;resiliency&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;ChaosFaultError: simulated 503 Service Unavailable&quot;&gt;&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_chaos_schema_drift_probe&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.062&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos&quot; /&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;chaos:schema_drift&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_survives_server_restart&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.018&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;resiliency&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;error message=&quot;ConnectionResetError: MCP server process exited with code 1&quot;&gt;Traceback (most recent call last):
+  File tests/test_resiliency.py, line 44
+    await assert_tool_call(...)&lt;/error&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_flaky_resource_read&quot; classname=&quot;tests/test_resiliency.py&quot; time=&quot;0.340&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;resiliency&quot; /&gt;
+      &lt;/properties&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_schema_probe_strict&quot; classname=&quot;tests/test_schema.py&quot; time=&quot;0.044&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;functional&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;failure message=&quot;Schema validation failed for tool &amp;apos;search&amp;apos;&quot;&gt;&lt;/failure&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_prompts_when_available&quot; classname=&quot;tests/test_prompts.py&quot; time=&quot;0.000&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;functional&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;skipped message=&quot;server has no prompts capability&quot; /&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_optional_bedrock_pack&quot; classname=&quot;tests/test_prompts.py&quot; time=&quot;0.000&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;integration&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;skipped message=&quot;optional extra mcp-test-harness-bedrock not installed&quot; /&gt;
+    &lt;/testcase&gt;
+    &lt;testcase name=&quot;test_long_running_export&quot; classname=&quot;tests/test_performance.py&quot; time=&quot;30.000&quot;&gt;
+      &lt;properties&gt;
+        &lt;property name=&quot;tag&quot; value=&quot;perf&quot; /&gt;
+      &lt;/properties&gt;
+      &lt;error message=&quot;Test exceeded timeout of 30000ms&quot;&gt;Test timed out&lt;/error&gt;
+    &lt;/testcase&gt;
+  &lt;/testsuite&gt;
+&lt;/testsuites&gt;</pre></div></details><details class="fmt-card fmt-card-expand fmt-json"><summary class="fmt-card-sum"><span class="fmt-head">JSON</span><span class="fmt-sub">Machine-readable data</span><span class="fmt-expand-hint">Click for full output</span><div class="fmt-preview"><pre>{
+  &quot;metadata&quot;: {
+    &quot;harness_version&quot;: &quot;3.0.9&quot;,
+    &quot;protocol_version&quot;: &quot;2025-03-26&quot;,
+    &quot;server_capabilities&quot;: {
+…</pre></div></summary><div class="fmt-full"><pre>{
+  &quot;metadata&quot;: {
+    &quot;harness_version&quot;: &quot;3.0.9&quot;,
+    &quot;protocol_version&quot;: &quot;2025-03-26&quot;,
+    &quot;server_capabilities&quot;: {
+      &quot;tools&quot;: {
+        &quot;listChanged&quot;: true
+      },
+      &quot;resources&quot;: {
+        &quot;subscribe&quot;: false
+      },
+      &quot;logging&quot;: {},
+      &quot;prompts&quot;: {}
+    },
+    &quot;started_at&quot;: &quot;2026-07-06T20:10:00.000Z&quot;,
+    &quot;finished_at&quot;: &quot;2026-07-06T20:10:02.340Z&quot;
+  },
+  &quot;environment&quot;: {
+    &quot;python_version&quot;: &quot;3.12.4&quot;,
+    &quot;platform&quot;: &quot;Windows-11-amd64&quot;,
+    &quot;cwd&quot;: &quot;C:/demo/mcp-server&quot;,
+    &quot;server_command&quot;: &quot;python -m my_mcp_server --transport stdio&quot;,
+    &quot;transport&quot;: &quot;stdio&quot;,
+    &quot;bastion_paired&quot;: &quot;CI verifies \u00b7 Bastion protects production&quot;,
+    &quot;report_generated_at&quot;: &quot;2026-07-07T05:55:05.469847+00:00&quot;
+  },
+  &quot;summary&quot;: {
+    &quot;total&quot;: 21,
+    &quot;passed&quot;: 11,
+    &quot;failed&quot;: 6,
+    &quot;errored&quot;: 1,
+    &quot;skipped&quot;: 2,
+    &quot;timed_out&quot;: 1,
+    &quot;total_duration_ms&quot;: 2340.0,
+    &quot;duration_percentiles_ms&quot;: {
+      &quot;p50_ms&quot;: 88.0,
+      &quot;p95_ms&quot;: 30000.0,
+      &quot;p99_ms&quot;: 30000.0
+    }
+  },
+  &quot;tests&quot;: [
+    {
+      &quot;name&quot;: &quot;test_echo_tool_returns_message&quot;,
+      &quot;module&quot;: &quot;tests/test_server.py&quot;,
+      &quot;file&quot;: &quot;tests/test_server.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 12.4,
+      &quot;tags&quot;: [
+        &quot;smoke&quot;,
+        &quot;functional&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.120Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_tool_schema_matches_openapi&quot;,
+      &quot;module&quot;: &quot;tests/test_server.py&quot;,
+      &quot;file&quot;: &quot;tests/test_server.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 48.2,
+      &quot;tags&quot;: [
+        &quot;functional&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.117000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_list_tools_includes_echo&quot;,
+      &quot;module&quot;: &quot;tests/test_server.py&quot;,
+      &quot;file&quot;: &quot;tests/test_server.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 6.8,
+      &quot;tags&quot;: [
+        &quot;smoke&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.234000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_echo_rejects_empty_payload&quot;,
+      &quot;module&quot;: &quot;tests/test_server.py&quot;,
+      &quot;file&quot;: &quot;tests/test_server.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 31.5,
+      &quot;tags&quot;: [
+        &quot;functional&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.351000Z&quot;,
+      &quot;error&quot;: &quot;Tool &#x27;echo&#x27; response mismatch&quot;,
+      &quot;assertion_diff&quot;: &quot;--- expected\n+++ actual\n@@ -1,3 +1,3 @@\n [{\&quot;text\&quot;: \&quot;validation error\&quot;, \&quot;isError\&quot;: true}]\n+[{\&quot;text\&quot;: \&quot;ok\&quot;, \&quot;isError\&quot;: false}]&quot;,
+      &quot;mcp_trace&quot;: {
+        &quot;event_count&quot;: 4,
+        &quot;stdio_pollution&quot;: [
+          &quot;WARN: deprecated config key in stderr&quot;
+        ],
+        &quot;events&quot;: [
+          {
+            &quot;t_ms&quot;: 0.8,
+            &quot;direction&quot;: &quot;request&quot;,
+            &quot;method&quot;: &quot;tools/call&quot;,
+            &quot;bytes&quot;: 84,
+            &quot;payload&quot;: {
+              &quot;name&quot;: &quot;echo&quot;,
+              &quot;arguments&quot;: {
+                &quot;message&quot;: &quot;ping&quot;
+              }
+            }
+          },
+          {
+            &quot;t_ms&quot;: 3.2,
+            &quot;direction&quot;: &quot;response&quot;,
+            &quot;method&quot;: &quot;tools/call&quot;,
+            &quot;bytes&quot;: 120,
+            &quot;payload&quot;: {
+              &quot;content&quot;: [
+                {
+                  &quot;type&quot;: &quot;text&quot;,
+                  &quot;text&quot;: &quot;ping&quot;
+                }
+              ]
+            }
+          },
+          {
+            &quot;t_ms&quot;: 4.1,
+            &quot;direction&quot;: &quot;request&quot;,
+            &quot;method&quot;: &quot;tools/call&quot;,
+            &quot;bytes&quot;: 92,
+            &quot;payload&quot;: {
+              &quot;name&quot;: &quot;echo&quot;,
+              &quot;arguments&quot;: {
+                &quot;message&quot;: &quot;&quot;
+              }
+            }
+          },
+          {
+            &quot;t_ms&quot;: 5.0,
+            &quot;direction&quot;: &quot;error&quot;,
+            &quot;method&quot;: &quot;tools/call&quot;,
+            &quot;bytes&quot;: 64,
+            &quot;payload&quot;: {
+              &quot;isError&quot;: true,
+              &quot;message&quot;: &quot;message must be non-empty&quot;
+            },
+            &quot;stdio_pollution&quot;: true
+          }
+        ]
+      }
+    },
+    {
+      &quot;name&quot;: &quot;test_report_snapshot_stable&quot;,
+      &quot;module&quot;: &quot;tests/test_regression.py&quot;,
+      &quot;file&quot;: &quot;tests/test_regression.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 89.0,
+      &quot;tags&quot;: [
+        &quot;regression&quot;,
+        &quot;snapshot&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.468000Z&quot;,
+      &quot;error&quot;: &quot;Snapshot mismatch for &#x27;generate_report&#x27;&quot;,
+      &quot;assertion_diff&quot;: &quot;--- expected\n+++ actual\n- {&#x27;version&#x27;: &#x27;2.0.0&#x27;}\n+ {&#x27;version&#x27;: &#x27;2.0.1&#x27;}&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_tool_idempotent_calculate&quot;,
+      &quot;module&quot;: &quot;tests/test_regression.py&quot;,
+      &quot;file&quot;: &quot;tests/test_regression.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 156.3,
+      &quot;tags&quot;: [
+        &quot;regression&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.585000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_injection_payloads_blocked&quot;,
+      &quot;module&quot;: &quot;tests/test_security.py&quot;,
+      &quot;file&quot;: &quot;tests/test_security.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 420.7,
+      &quot;tags&quot;: [
+        &quot;security&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.702000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_no_secret_leak_in_logs&quot;,
+      &quot;module&quot;: &quot;tests/test_security.py&quot;,
+      &quot;file&quot;: &quot;tests/test_security.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 55.1,
+      &quot;tags&quot;: [
+        &quot;security&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.819000Z&quot;,
+      &quot;error&quot;: &quot;Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_path_traversal_blocked&quot;,
+      &quot;module&quot;: &quot;tests/test_security.py&quot;,
+      &quot;file&quot;: &quot;tests/test_security.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 210.4,
+      &quot;tags&quot;: [
+        &quot;security&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:00.936000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_echo_latency_p95_under_slo&quot;,
+      &quot;module&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;file&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 1240.0,
+      &quot;tags&quot;: [
+        &quot;perf&quot;,
+        &quot;latency&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.053000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_throughput_min_rps&quot;,
+      &quot;module&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;file&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 980.0,
+      &quot;tags&quot;: [
+        &quot;perf&quot;,
+        &quot;throughput&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.170000Z&quot;,
+      &quot;error&quot;: &quot;Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_degrades_gracefully_on_bad_args&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 72.0,
+      &quot;tags&quot;: [
+        &quot;resiliency&quot;,
+        &quot;chaos&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.287000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_chaos_delay_tolerance&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 145.0,
+      &quot;tags&quot;: [
+        &quot;chaos&quot;,
+        &quot;chaos:delay&quot;,
+        &quot;resiliency&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.404000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_chaos_503_unavailable&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 88.0,
+      &quot;tags&quot;: [
+        &quot;chaos&quot;,
+        &quot;chaos:503&quot;,
+        &quot;resiliency&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.521000Z&quot;,
+      &quot;error&quot;: &quot;ChaosFaultError: simulated 503 Service Unavailable&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_chaos_schema_drift_probe&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 62.0,
+      &quot;tags&quot;: [
+        &quot;chaos&quot;,
+        &quot;chaos:schema_drift&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.638000Z&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_survives_server_restart&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;error&quot;,
+      &quot;duration_ms&quot;: 18.0,
+      &quot;tags&quot;: [
+        &quot;resiliency&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.755000Z&quot;,
+      &quot;error&quot;: &quot;ConnectionResetError: MCP server process exited with code 1&quot;,
+      &quot;traceback&quot;: &quot;Traceback (most recent call last):\n  File tests/test_resiliency.py, line 44\n    await assert_tool_call(...)&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_flaky_resource_read&quot;,
+      &quot;module&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;file&quot;: &quot;tests/test_resiliency.py&quot;,
+      &quot;status&quot;: &quot;passed&quot;,
+      &quot;duration_ms&quot;: 340.0,
+      &quot;tags&quot;: [
+        &quot;resiliency&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.872000Z&quot;,
+      &quot;retry_count&quot;: 2,
+      &quot;attempt_results&quot;: [
+        {
+          &quot;attempt&quot;: 1,
+          &quot;status&quot;: &quot;timeout&quot;,
+          &quot;duration_ms&quot;: 5000.0,
+          &quot;error&quot;: &quot;read_resource timed out&quot;
+        },
+        {
+          &quot;attempt&quot;: 2,
+          &quot;status&quot;: &quot;error&quot;,
+          &quot;duration_ms&quot;: 120.0,
+          &quot;error&quot;: &quot;503 from upstream&quot;
+        },
+        {
+          &quot;attempt&quot;: 3,
+          &quot;status&quot;: &quot;passed&quot;,
+          &quot;duration_ms&quot;: 88.0,
+          &quot;error&quot;: null
+        }
+      ],
+      &quot;flaky&quot;: true
+    },
+    {
+      &quot;name&quot;: &quot;test_schema_probe_strict&quot;,
+      &quot;module&quot;: &quot;tests/test_schema.py&quot;,
+      &quot;file&quot;: &quot;tests/test_schema.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;duration_ms&quot;: 44.0,
+      &quot;tags&quot;: [
+        &quot;functional&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:01.989000Z&quot;,
+      &quot;error&quot;: &quot;Schema validation failed for tool &#x27;search&#x27;&quot;,
+      &quot;schema_violations&quot;: [
+        {
+          &quot;json_path&quot;: &quot;$.arguments.limit&quot;,
+          &quot;expected_type&quot;: &quot;integer&quot;,
+          &quot;actual_value&quot;: &quot;ten&quot;,
+          &quot;message&quot;: &quot;limit must be an integer&quot;
+        }
+      ]
+    },
+    {
+      &quot;name&quot;: &quot;test_prompts_when_available&quot;,
+      &quot;module&quot;: &quot;tests/test_prompts.py&quot;,
+      &quot;file&quot;: &quot;tests/test_prompts.py&quot;,
+      &quot;status&quot;: &quot;skipped&quot;,
+      &quot;duration_ms&quot;: 0.0,
+      &quot;tags&quot;: [
+        &quot;functional&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:02.106000Z&quot;,
+      &quot;error&quot;: &quot;server has no prompts capability&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_optional_bedrock_pack&quot;,
+      &quot;module&quot;: &quot;tests/test_prompts.py&quot;,
+      &quot;file&quot;: &quot;tests/test_prompts.py&quot;,
+      &quot;status&quot;: &quot;skipped&quot;,
+      &quot;duration_ms&quot;: 0.0,
+      &quot;tags&quot;: [
+        &quot;integration&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:02.223000Z&quot;,
+      &quot;error&quot;: &quot;optional extra mcp-test-harness-bedrock not installed&quot;
+    },
+    {
+      &quot;name&quot;: &quot;test_long_running_export&quot;,
+      &quot;module&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;file&quot;: &quot;tests/test_performance.py&quot;,
+      &quot;status&quot;: &quot;timeout&quot;,
+      &quot;duration_ms&quot;: 30000.0,
+      &quot;tags&quot;: [
+        &quot;perf&quot;
+      ],
+      &quot;started_at&quot;: &quot;2026-07-06T20:10:02.340000Z&quot;,
+      &quot;error&quot;: &quot;Test exceeded timeout of 30000ms&quot;
+    }
+  ],
+  &quot;unified_summary&quot;: {
+    &quot;gate&quot;: &quot;fail&quot;,
+    &quot;overall&quot;: {
+      &quot;total&quot;: 21,
+      &quot;passed&quot;: 11,
+      &quot;failed&quot;: 8,
+      &quot;skipped&quot;: 2,
+      &quot;duration_ms&quot;: 2340.0
+    },
+    &quot;categories&quot;: {
+      &quot;functional&quot;: {
+        &quot;total&quot;: 9,
+        &quot;passed&quot;: 4,
+        &quot;failed&quot;: 3,
+        &quot;score_pct&quot;: 44.4,
+        &quot;status&quot;: &quot;fail&quot;
+      },
+      &quot;performance&quot;: {
+        &quot;total&quot;: 3,
+        &quot;passed&quot;: 1,
+        &quot;failed&quot;: 2,
+        &quot;score_pct&quot;: 33.3,
+        &quot;status&quot;: &quot;fail&quot;
+      },
+      &quot;security&quot;: {
+        &quot;total&quot;: 3,
+        &quot;passed&quot;: 2,
+        &quot;failed&quot;: 1,
+        &quot;score_pct&quot;: 66.7,
+        &quot;status&quot;: &quot;fail&quot;
+      },
+      &quot;resiliency&quot;: {
+        &quot;total&quot;: 6,
+        &quot;passed&quot;: 4,
+        &quot;failed&quot;: 2,
+        &quot;score_pct&quot;: 66.7,
+        &quot;status&quot;: &quot;fail&quot;
+      }
+    },
+    &quot;coverage&quot;: {
+      &quot;advertised&quot;: {
+        &quot;tools&quot;: [
+          &quot;calculate&quot;,
+          &quot;echo&quot;,
+          &quot;export_report&quot;,
+          &quot;get_config&quot;,
+          &quot;search&quot;
+        ],
+        &quot;resources&quot;: [
+          &quot;file:///config.json&quot;,
+          &quot;file:///health&quot;
+        ],
+        &quot;prompts&quot;: [
+          &quot;summarize&quot;
+        ]
+      },
+      &quot;tested&quot;: {
+        &quot;tools&quot;: [
+          &quot;calculate&quot;,
+          &quot;echo&quot;,
+          &quot;get_config&quot;,
+          &quot;search&quot;
+        ],
+        &quot;resources&quot;: [
+          &quot;file:///config.json&quot;
+        ],
+        &quot;prompts&quot;: [],
+        &quot;auth_tools&quot;: [
+          &quot;echo&quot;,
+          &quot;search&quot;
+        ]
+      },
+      &quot;gaps&quot;: {
+        &quot;untested_tools&quot;: [
+          &quot;export_report&quot;
+        ],
+        &quot;untested_resources&quot;: [
+          &quot;file:///health&quot;
+        ],
+        &quot;untested_prompts&quot;: [
+          &quot;summarize&quot;
+        ],
+        &quot;tools_missing_auth_tests&quot;: [
+          &quot;calculate&quot;,
+          &quot;get_config&quot;
+        ]
+      },
+      &quot;summary&quot;: {
+        &quot;tools_advertised&quot;: 5,
+        &quot;tools_tested&quot;: 4,
+        &quot;tools_untested&quot;: 1,
+        &quot;tools_missing_auth&quot;: 2
+      }
+    },
+    &quot;coverage_headline&quot;: &quot;4 tools tested, 1 untested, 2 missing auth tests&quot;
+  },
+  &quot;coverage&quot;: {
+    &quot;advertised&quot;: {
+      &quot;tools&quot;: [
+        &quot;calculate&quot;,
+        &quot;echo&quot;,
+        &quot;export_report&quot;,
+        &quot;get_config&quot;,
+        &quot;search&quot;
+      ],
+      &quot;resources&quot;: [
+        &quot;file:///config.json&quot;,
+        &quot;file:///health&quot;
+      ],
+      &quot;prompts&quot;: [
+        &quot;summarize&quot;
+      ]
+    },
+    &quot;tested&quot;: {
+      &quot;tools&quot;: [
+        &quot;calculate&quot;,
+        &quot;echo&quot;,
+        &quot;get_config&quot;,
+        &quot;search&quot;
+      ],
+      &quot;resources&quot;: [
+        &quot;file:///config.json&quot;
+      ],
+      &quot;prompts&quot;: [],
+      &quot;auth_tools&quot;: [
+        &quot;echo&quot;,
+        &quot;search&quot;
+      ]
+    },
+    &quot;gaps&quot;: {
+      &quot;untested_tools&quot;: [
+        &quot;export_report&quot;
+      ],
+      &quot;untested_resources&quot;: [
+        &quot;file:///health&quot;
+      ],
+      &quot;untested_prompts&quot;: [
+        &quot;summarize&quot;
+      ],
+      &quot;tools_missing_auth_tests&quot;: [
+        &quot;calculate&quot;,
+        &quot;get_config&quot;
+      ]
+    },
+    &quot;summary&quot;: {
+      &quot;tools_advertised&quot;: 5,
+      &quot;tools_tested&quot;: 4,
+      &quot;tools_untested&quot;: 1,
+      &quot;tools_missing_auth&quot;: 2
+    }
+  },
+  &quot;security_findings&quot;: [
+    {
+      &quot;test_name&quot;: &quot;test_no_secret_leak_in_logs&quot;,
+      &quot;file&quot;: &quot;tests/test_security.py&quot;,
+      &quot;status&quot;: &quot;failed&quot;,
+      &quot;message&quot;: &quot;Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key&quot;,
+      &quot;rule&quot;: {
+        &quot;id&quot;: &quot;mcp01-token-mismanagement&quot;,
+        &quot;name&quot;: &quot;Token Mismanagement &amp; Secret Exposure&quot;,
+        &quot;framework&quot;: &quot;OWASP-MCP&quot;,
+        &quot;owasp_id&quot;: &quot;MCP01&quot;,
+        &quot;severity&quot;: &quot;high&quot;
+      }
+    }
+  ]
+}</pre></div></details><a class="fmt-card fmt-card-link fmt-html" href="#mcp-stat-grid"><div class="fmt-head">HTML Dashboard <span class="fmt-link-hint">↓ view below</span></div><div class="fmt-sub">Rich visual reporting (this page)</div><div class="fmt-preview"><pre>PASS 11 · FAIL 8 · SKIP 2
+Pass rate 52% · 2.34s
+Click to jump to charts &amp; filters below</pre></div></a></div><p class="formats-export-hint">Export this run: <code>mcp-test --report-format html --report-output report.html</code> · <code>--report-format junit</code> · <code>--report-format json</code> · <code>mcp-test export-pdf report.html</code></p></section>
+  <div class="quality bad" role="status"><span>QUALITY GATE: FAILED</span></div>
+  <div class="stat-grid" id="mcp-stat-grid" data-total="21" data-pass="11" data-fail="6" data-error="1" data-skip="2" data-timeout="1"><div class="stat-card sc-pass"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div><div class="stat-body"><div class="stat-label">Passed</div><div class="stat-value" id="mcp-stat-pass">11</div></div></div><div class="stat-card sc-fail"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></div><div class="stat-body"><div class="stat-label">Failed</div><div class="stat-value" id="mcp-stat-fail">8</div></div></div><div class="stat-card sc-skip"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg></div><div class="stat-body"><div class="stat-label">Skipped</div><div class="stat-value" id="mcp-stat-skip">2</div></div></div><div class="stat-card sc-time"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="stat-body"><div class="stat-label">Duration</div><div class="stat-value">2.34s</div></div></div></div>
+  <section class="analytics"><div class="analytics-card chart-card"><h3>Pass rate</h3><div class="donut-wrap"><div class="donut-outer" style="background:conic-gradient(#1abc7a 0.000deg 188.571deg, #e74c3c 188.571deg 291.429deg, #f39c12 291.429deg 308.571deg, #7f8c8d 308.571deg 342.857deg, #9b59b6 342.857deg 360.000deg)"><div class="donut-inner"><span class="donut-pct">52%</span><span class="donut-sub">pass rate</span></div></div><div class="pie-legend"><div class="leg-row"><span class="leg-dot" style="background:#1abc7a"></span><span class="leg-name">Passed</span><span class="leg-pct">52%</span><span class="leg-n">11</span></div><div class="leg-row"><span class="leg-dot" style="background:#e74c3c"></span><span class="leg-name">Failed</span><span class="leg-pct">29%</span><span class="leg-n">6</span></div><div class="leg-row"><span class="leg-dot" style="background:#f39c12"></span><span class="leg-name">Errors</span><span class="leg-pct">5%</span><span class="leg-n">1</span></div><div class="leg-row"><span class="leg-dot" style="background:#7f8c8d"></span><span class="leg-name">Skipped</span><span class="leg-pct">10%</span><span class="leg-n">2</span></div><div class="leg-row"><span class="leg-dot" style="background:#9b59b6"></span><span class="leg-name">Timeouts</span><span class="leg-pct">5%</span><span class="leg-n">1</span></div></div></div></div><div class="analytics-card"><h3>Run timeline</h3><p class="chart-hint">Cumulative pass rate across tests in execution order</p><svg class="timeline-svg" viewBox="0 0 320 120" role="img" aria-label="Cumulative pass rate across tests"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1abc7a" stop-opacity="0.35"/><stop offset="100%" stop-color="#1abc7a" stop-opacity="0"/></linearGradient></defs><polygon points="24,96 24.0,24.0 37.6,24.0 51.2,24.0 64.8,42.0 78.4,52.8 92.0,48.0 105.6,44.6 119.2,51.0 132.8,48.0 146.4,45.6 160.0,50.2 173.6,48.0 187.2,46.2 200.8,49.7 214.4,48.0 228.0,51.0 241.6,49.4 255.2,52.0 268.8,54.3 282.4,56.4 296.0,58.3 296,96" fill="url(#tg)"/><polyline points="24.0,24.0 37.6,24.0 51.2,24.0 64.8,42.0 78.4,52.8 92.0,48.0 105.6,44.6 119.2,51.0 132.8,48.0 146.4,45.6 160.0,50.2 173.6,48.0 187.2,46.2 200.8,49.7 214.4,48.0 228.0,51.0 241.6,49.4 255.2,52.0 268.8,54.3 282.4,56.4 296.0,58.3" fill="none" stroke="#1abc7a" stroke-width="2.5" stroke-linecap="round"/></svg></div><div class="analytics-card"><h3>Top failing tests</h3><ul class="fail-list"><li class="fail-item"><span class="fail-name">test_echo_rejects_empty_payload</span><span class="fail-badge b-fail">FAIL</span><div class="fail-msg">Tool &#x27;echo&#x27; response mismatch</div></li><li class="fail-item"><span class="fail-name">test_report_snapshot_stable</span><span class="fail-badge b-fail">FAIL</span><div class="fail-msg">Snapshot mismatch for &#x27;generate_report&#x27;</div></li><li class="fail-item"><span class="fail-name">test_no_secret_leak_in_logs</span><span class="fail-badge b-fail">FAIL</span><div class="fail-msg">Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key</div></li><li class="fail-item"><span class="fail-name">test_throughput_min_rps</span><span class="fail-badge b-fail">FAIL</span><div class="fail-msg">Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)</div></li><li class="fail-item"><span class="fail-name">test_chaos_503_unavailable</span><span class="fail-badge b-fail">FAIL</span><div class="fail-msg">ChaosFaultError: simulated 503 Service Unavailable</div></li><li class="fail-item"><span class="fail-name">test_survives_server_restart</span><span class="fail-badge b-error">ERROR</span><div class="fail-msg">ConnectionResetError: MCP server process exited with code 1</div></li><li class="fail-more">+2 more</li></ul></div><div class="analytics-card"><h3>Slowest tests</h3><div class="dur-chart"><div class="dur-row"><div class="dur-label" title="test_long_running_export">test_long_running_export</div><div class="dur-track"><div class="dur-fill dur-timeout" style="width:100.0%"></div></div><div class="dur-ms">30000ms</div></div><div class="dur-row"><div class="dur-label" title="test_echo_latency_p95_under_slo">test_echo_latency_p95_under_slo</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:4.1%"></div></div><div class="dur-ms">1240ms</div></div><div class="dur-row"><div class="dur-label" title="test_throughput_min_rps">test_throughput_min_rps</div><div class="dur-track"><div class="dur-fill dur-fail" style="width:3.3%"></div></div><div class="dur-ms">980ms</div></div><div class="dur-row"><div class="dur-label" title="test_injection_payloads_blocked">test_injection_payloads_blocked</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:1.4%"></div></div><div class="dur-ms">421ms</div></div><div class="dur-row"><div class="dur-label" title="test_flaky_resource_read">test_flaky_resource_read</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:1.1%"></div></div><div class="dur-ms">340ms</div></div><div class="dur-row"><div class="dur-label" title="test_path_traversal_blocked">test_path_traversal_blocked</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:0.7%"></div></div><div class="dur-ms">210ms</div></div><div class="dur-row"><div class="dur-label" title="test_tool_idempotent_calculate">test_tool_idempotent_calculate</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:0.5%"></div></div><div class="dur-ms">156ms</div></div><div class="dur-row"><div class="dur-label" title="test_chaos_delay_tolerance">test_chaos_delay_tolerance</div><div class="dur-track"><div class="dur-fill dur-pass" style="width:0.5%"></div></div><div class="dur-ms">145ms</div></div></div></div></section>
+  <section class="feat-highlights"><h2 class="section-title">Harness features in this run</h2><p class="section-sub">Security payloads, performance SLOs, chaos, traces, schema validation, and more.</p><div class="feat-grid"><div class="feat-chip feat-sec"><span class="feat-val">3</span><span class="feat-lbl">Security tests</span></div><div class="feat-chip feat-perf"><span class="feat-val">3</span><span class="feat-lbl">Performance</span></div><div class="feat-chip feat-res"><span class="feat-val">6</span><span class="feat-lbl">Resiliency / chaos</span></div><div class="feat-chip feat-trace"><span class="feat-val">1</span><span class="feat-lbl">MCP traces</span></div><div class="feat-chip feat-flaky"><span class="feat-val">1</span><span class="feat-lbl">Flaky (retried)</span></div><div class="feat-chip feat-schema"><span class="feat-val">1</span><span class="feat-lbl">Schema checks</span></div><div class="feat-chip feat-tags"><span class="feat-val">14</span><span class="feat-lbl">Unique tags</span></div></div></section>
+  <section class="toolkit-panel"><h2 class="section-title">Platform QA toolkit</h2><p class="section-sub">Features exercised in this run — chaos, load, security, resiliency, regression, trace.</p><div class="toolkit-grid"><div class="toolkit-card toolkit-chaos"><div class="toolkit-n">4</div><div class="toolkit-title">Chaos monkey</div><div class="toolkit-sub">delay · 503 · truncate · drift</div></div><div class="toolkit-card toolkit-perf"><div class="toolkit-n">3</div><div class="toolkit-title">Load / throughput</div><div class="toolkit-sub">assert_latency · assert_throughput</div></div><div class="toolkit-card toolkit-sec"><div class="toolkit-n">3</div><div class="toolkit-title">Security payloads</div><div class="toolkit-sub">injection · traversal · secrets</div></div><div class="toolkit-card toolkit-res"><div class="toolkit-n">5</div><div class="toolkit-title">Resiliency</div><div class="toolkit-sub">degrades · reconnect · crash</div></div><div class="toolkit-card toolkit-reg"><div class="toolkit-n">2</div><div class="toolkit-title">Regression</div><div class="toolkit-sub">assert_snapshot · idempotent</div></div><div class="toolkit-card toolkit-trace"><div class="toolkit-n">1</div><div class="toolkit-title">MCP trace</div><div class="toolkit-sub">per-test JSON-RPC timeline</div></div></div></section>
+  <section class="chaos-panel platform-panel"><h2 class="section-title">Chaos monkey</h2><p class="section-sub">Protocol-aware faults on <code>call_tool</code> (<code>@marker(tags=[&quot;chaos&quot;], chaos_faults=[...])</code>) — 3/4 survived.</p><div class="chaos-legend"><span class="chaos-pill" title="Inject latency before tool responses">delay</span><span class="chaos-pill" title="Simulate gateway / transport unavailable">503</span><span class="chaos-pill" title="Return partial tool result payloads">truncate</span><span class="chaos-pill" title="Mutate response shape to probe clients">schema_drift</span></div><table class="platform-table"><thead><tr><th>Test</th><th>Faults injected</th><th>Outcome</th><th>Duration</th></tr></thead><tbody><tr><td><a href="#test-test-degrades-gracefully-on-bad-args">test_degrades_gracefully_on_bad_args</a></td><td><code class="chaos-faults">delay</code></td><td><span class="badge b-pass">PASS</span></td><td class="num">72ms</td></tr><tr><td><a href="#test-test-chaos-delay-tolerance">test_chaos_delay_tolerance</a></td><td><code class="chaos-faults">delay</code></td><td><span class="badge b-pass">PASS</span></td><td class="num">145ms</td></tr><tr><td><a href="#test-test-chaos-503-unavailable">test_chaos_503_unavailable</a></td><td><code class="chaos-faults">503</code></td><td><span class="badge b-fail">FAIL</span></td><td class="num">88ms</td></tr><tr><td><a href="#test-test-chaos-schema-drift-probe">test_chaos_schema_drift_probe</a></td><td><code class="chaos-faults">schema_drift</code></td><td><span class="badge b-pass">PASS</span></td><td class="num">62ms</td></tr></tbody></table></section>
+  <section class="perf-panel platform-panel"><h2 class="section-title">Load &amp; performance SLOs</h2><p class="section-sub">Suite duration percentiles plus <code>assert_latency</code> / <code>assert_throughput</code> / baseline checks.</p><div class="pct-grid"><div class="pct-card"><div class="pct-k">P50</div><div class="pct-v">88.0<span class="pct-u">ms</span></div></div><div class="pct-card"><div class="pct-k">P95</div><div class="pct-v">30000.0<span class="pct-u">ms</span></div></div><div class="pct-card"><div class="pct-k">P99</div><div class="pct-v">30000.0<span class="pct-u">ms</span></div></div></div><p class="muted load-note"><code>assert_throughput</code> exercises concurrent <code>call_tool</code> with <code>min_rps</code>, <code>max_p99_ms</code>, and <code>max_error_rate</code> gates.</p><table class="platform-table"><thead><tr><th>Test</th><th>Tags</th><th>Outcome</th><th>Duration</th><th>SLO note</th></tr></thead><tbody><tr><td><a href="#test-test-echo-latency-p95-under-slo">test_echo_latency_p95_under_slo</a></td><td>perf, latency</td><td><span class="badge b-pass">PASS</span></td><td class="num">1240ms</td><td></td></tr><tr><td><a href="#test-test-throughput-min-rps">test_throughput_min_rps</a></td><td>perf, throughput</td><td><span class="badge b-fail">FAIL</span></td><td class="num">980ms</td><td><div class="slo-hint">Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)</div></td></tr><tr><td><a href="#test-test-long-running-export">test_long_running_export</a></td><td>perf</td><td><span class="badge b-timeout">TIMEOUT</span></td><td class="num">30000ms</td><td></td></tr></tbody></table></section>
+  <section class="bastion-panel platform-panel"><h2 class="section-title">Security findings &amp; MCP-Bastion pairing</h2><p class="section-sub">Test defenses in CI with the harness; enforce at runtime with <a href="https://github.com/vaquarkhan/MCP-Bastion" target="_blank" rel="noopener">MCP-Bastion</a>.</p><div class="bastion-split"><div class="bastion-col-card ci-card"><h3>CI gate (this report)</h3><p class="bastion-ver">Installed <code>mcp-bastion-python 2.0.0</code> &middot; CI verifies · Bastion protects production</p><ul class="findings-list"><li class="finding-item sev-high"><span class="finding-rule">mcp01-token-mismanagement</span> <span class="finding-sev">HIGH</span><br><a href="#test-test-no-secret-leak-in-logs">test_no_secret_leak_in_logs</a><div class="finding-msg">Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key</div></li></ul><p class="bastion-cta muted">Export SARIF: <code>mcp-test --sarif-output findings.sarif</code></p></div><div class="bastion-col-card prod-card"><h3>Production (MCP-Bastion)</h3><table class="pair-table"><thead><tr><th>Threat</th><th>Harness verifies</th><th>Bastion enforces</th></tr></thead><tbody><tr><td>Prompt injection</td><td><code>assert_injection_blocked</code></td><td class="bastion-col">PromptGuard middleware</td></tr><tr><td>PII / secrets</td><td><code>assert_no_secret_leak</code></td><td class="bastion-col">Presidio redaction</td></tr><tr><td>Auth boundaries</td><td><code>assert_authorization_boundary</code></td><td class="bastion-col">RBAC + tool policies</td></tr><tr><td>Rate limits</td><td><code>assert_throughput SLOs</code></td><td class="bastion-col">Token budgets &amp; iteration caps</td></tr><tr><td>Path traversal</td><td><code>assert_path_traversal_blocked</code></td><td class="bastion-col">Policy-as-code rules</td></tr></tbody></table><p class="bastion-install"><code>pip install mcp-bastion-python</code> &middot; <a href="https://pypi.org/project/mcp-bastion-python/" target="_blank" rel="noopener">PyPI</a></p></div></div></section>
+  <section class="portal"><h2>Unified test portal</h2><div class="portal-grid"><div class="portal-card portal-fail"><div class="portal-label">Functional</div><div class="portal-score">44.4%</div><div class="portal-sub">9 test(s) · fail</div></div><div class="portal-card portal-fail"><div class="portal-label">Performance</div><div class="portal-score">33.3%</div><div class="portal-sub">3 test(s) · fail</div></div><div class="portal-card portal-fail"><div class="portal-label">Security</div><div class="portal-score">66.7%</div><div class="portal-sub">3 test(s) · fail</div></div><div class="portal-card portal-fail"><div class="portal-label">Resiliency</div><div class="portal-score">66.7%</div><div class="portal-sub">6 test(s) · fail</div></div></div><p class="portal-cov">4 tools tested, 1 untested, 2 missing auth tests</p><ul class="portal-gaps"><li>untested tool: <code>export_report</code></li><li>missing auth test: <code>calculate</code></li><li>missing auth test: <code>get_config</code></li></ul></section>
+  <section class="cov-panel"><h2 class="section-title">MCP inventory coverage</h2><p class="section-sub">Advertised vs exercised tools, resources, and prompts (coverage map).</p><p class="cov-auth">Auth boundary tests: <strong>2</strong> of <strong>4</strong> exercised tools &middot; <span class="cov-warn">2 missing</span></p><div class="cov-blocks"><div class="cov-block"><div class="cov-head"><span>Tools</span><div class="cov-bar-track"><div class="cov-bar-fill" style="width:80%"></div></div><span class="cov-bar-pct">4/5</span></div><div class="cov-chips"><span class="cov-chip cov-ok" title="tested">&#10003; calculate</span><span class="cov-chip cov-ok" title="tested">&#10003; echo</span><span class="cov-chip cov-gap" title="not tested">! export_report</span><span class="cov-chip cov-ok" title="tested">&#10003; get_config</span><span class="cov-chip cov-ok" title="tested">&#10003; search</span></div><p class="cov-gap-note">1 untested</p></div><div class="cov-block"><div class="cov-head"><span>Resources</span><div class="cov-bar-track"><div class="cov-bar-fill" style="width:50%"></div></div><span class="cov-bar-pct">1/2</span></div><div class="cov-chips"><span class="cov-chip cov-ok" title="tested">&#10003; file:///config.json</span><span class="cov-chip cov-gap" title="not tested">! file:///health</span></div><p class="cov-gap-note">1 untested</p></div><div class="cov-block"><div class="cov-head"><span>Prompts</span><div class="cov-bar-track"><div class="cov-bar-fill" style="width:0%"></div></div><span class="cov-bar-pct">0/1</span></div><div class="cov-chips"><span class="cov-chip cov-gap" title="not tested">! summarize</span></div><p class="cov-gap-note">1 untested</p></div></div></section>
+  <section class="tags-panel"><h2 class="section-title">Results by tag</h2><p class="section-sub">security, perf, chaos, smoke — pass rate per marker category.</p><div class="tags-table-wrap"><table class="tags-table"><thead><tr><th>Tag</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass rate</th></tr></thead><tbody><tr><td><span class="tagchip">chaos</span></td><td class="num">3</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:75%"></div></div><span class="tag-rate">75%</span></td></tr><tr><td><span class="tagchip">chaos:503</span></td><td class="num">0</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:0%"></div></div><span class="tag-rate">0%</span></td></tr><tr><td><span class="tagchip">chaos:delay</span></td><td class="num">1</td><td class="num fail-n">0</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:100%"></div></div><span class="tag-rate">100%</span></td></tr><tr><td><span class="tagchip">chaos:schema_drift</span></td><td class="num">1</td><td class="num fail-n">0</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:100%"></div></div><span class="tag-rate">100%</span></td></tr><tr><td><span class="tagchip">functional</span></td><td class="num">2</td><td class="num fail-n">2</td><td class="num">1</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:40%"></div></div><span class="tag-rate">40%</span></td></tr><tr><td><span class="tagchip">integration</span></td><td class="num">0</td><td class="num fail-n">0</td><td class="num">1</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:0%"></div></div><span class="tag-rate">0%</span></td></tr><tr><td><span class="tagchip">latency</span></td><td class="num">1</td><td class="num fail-n">0</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:100%"></div></div><span class="tag-rate">100%</span></td></tr><tr><td><span class="tagchip">perf</span></td><td class="num">1</td><td class="num fail-n">2</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:33%"></div></div><span class="tag-rate">33%</span></td></tr><tr><td><span class="tagchip">regression</span></td><td class="num">1</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:50%"></div></div><span class="tag-rate">50%</span></td></tr><tr><td><span class="tagchip">resiliency</span></td><td class="num">3</td><td class="num fail-n">2</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:60%"></div></div><span class="tag-rate">60%</span></td></tr><tr><td><span class="tagchip">security</span></td><td class="num">2</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:67%"></div></div><span class="tag-rate">67%</span></td></tr><tr><td><span class="tagchip">smoke</span></td><td class="num">2</td><td class="num fail-n">0</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:100%"></div></div><span class="tag-rate">100%</span></td></tr><tr><td><span class="tagchip">snapshot</span></td><td class="num">0</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:0%"></div></div><span class="tag-rate">0%</span></td></tr><tr><td><span class="tagchip">throughput</span></td><td class="num">0</td><td class="num fail-n">1</td><td class="num">0</td><td><div class="tag-bar"><div class="tag-bar-fill" style="width:0%"></div></div><span class="tag-rate">0%</span></td></tr></tbody></table></div></section>
+  <section class="diag-panel"><h2 class="section-title">Diagnostics</h2><p class="section-sub">Jump to flaky retries, schema drift, and per-test MCP trace timelines.</p><div class="diag-cols"><div class="diag-col"><h4>Flaky tests</h4><ul class="diag-list"><li><a href="#test-test-flaky-resource-read">test_flaky_resource_read</a> <span class="muted">(2 retries)</span></li></ul></div><div class="diag-col"><h4>Schema violations</h4><ul class="diag-list"><li><a href="#test-test-schema-probe-strict">test_schema_probe_strict</a> <span class="muted">1 violation(s)</span></li></ul></div><div class="diag-col"><h4>MCP JSON-RPC traces</h4><ul class="diag-list"><li><a href="#test-test-echo-rejects-empty-payload">test_echo_rejects_empty_payload</a> <span class="muted">4 events</span></li></ul></div></div></section>
+  <div class="filter-row">
+    <label for="mcp-filter" class="muted" style="font-size:0.8rem">Filter</label>
+    <input type="search" id="mcp-filter" placeholder="Name, file, status, tag… (/ to focus)" autocomplete="off" />
+    <div class="filter-chips" id="mcp-status-filters">
+      <span class="filter-chip active" data-status="all">All</span>
+      <span class="filter-chip" data-status="passed">Passed</span>
+      <span class="filter-chip" data-status="failed">Failed</span>
+      <span class="filter-chip" data-status="error">Error</span>
+      <span class="filter-chip" data-status="skipped">Skipped</span>
+      <span class="filter-chip" data-status="timeout">Timeout</span>
+    </div>
+    <span class="kbd-hint no-print"><kbd>/</kbd> search · <kbd>Esc</kbd> clear · <kbd>?</kbd> shortcuts</span>
+    <div id="mcp-filter-summary" class="filter-summary no-print">Showing all tests</div>
+    <div class="date-filters no-print" id="mcp-date-filters">
+      <span class="date-run-hint">Run window: 2026-07-06T20:10:00.000Z &rarr; 2026-07-06T20:10:02.340Z</span>
+      <label for="mcp-date-from">From <input type="datetime-local" id="mcp-date-from" aria-label="Filter from date and time"></label>
+      <label for="mcp-date-to">To <input type="datetime-local" id="mcp-date-to" aria-label="Filter to date and time"></label>
+      <button type="button" class="btn-date-clear" id="mcp-date-clear">Clear dates</button>
+    </div>
+    <div class="dur-filters no-print">
+      <label for="mcp-dur-min">Min ms <input type="number" id="mcp-dur-min" min="0" step="1" placeholder="0"></label>
+      <label for="mcp-dur-max">Max ms <input type="number" id="mcp-dur-max" min="0" step="1" placeholder="∞"></label>
+      <button type="button" class="btn-date-clear" id="mcp-dur-clear">Clear duration</button>
+    </div>
+  </div>
+  <div id="mcp-shortcut-toast" class="shortcut-toast no-print" role="status" aria-live="polite"></div>
+  <div class="srv-panels">
+    <div class="panel">
+      <h3>Server &amp; protocol</h3>
+      <p><strong>Protocol</strong> 2025-03-26</p>
+      <p><strong>Capabilities</strong> tools, resources, logging, prompts</p>
+    </div>
+    <div class="panel">
+      <h3>Environment</h3>
+      <ul class="env-list"><li><strong>python_version</strong> <code>3.12.4</code></li><li><strong>platform</strong> <code>Windows-11-amd64</code></li><li><strong>cwd</strong> <code>C:/demo/mcp-server</code></li><li><strong>server_command</strong> <code>python -m my_mcp_server --transport stdio</code></li><li><strong>transport</strong> <code>stdio</code></li></ul>
+    </div>
+  </div>
+  <h2 class="results-head">Results by file</h2>
+  <details class="file-block" open><summary class="file-sum">tests/test_performance.py <span class="n">(3)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-echo-latency-p95-under-slo" class="mcp-trow row-pass" data-k="test_echo_latency_p95_under_slo tests/test_performance.py passed perf latency " data-ms="1240.0000" data-status="passed" data-file="tests/test_performance.py" data-started-ms="1783368601053" data-started-iso="2026-07-06T20:10:01.053000Z"><td class="name">test_echo_latency_p95_under_slo</td><td class="tags"><span class="tagchip">perf</span> <span class="tagchip">latency</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="1240.0">1240.0 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-throughput-min-rps" class="mcp-trow row-fail" data-k="test_throughput_min_rps tests/test_performance.py failed perf throughput " data-ms="980.0000" data-status="failed" data-file="tests/test_performance.py" data-started-ms="1783368601170" data-started-iso="2026-07-06T20:10:01.170000Z"><td class="name">test_throughput_min_rps</td><td class="tags"><span class="tagchip">perf</span> <span class="tagchip">throughput</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="980.0">980.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Throughput 42.1 rps below minimum 50.0 rps (p99=312ms)</pre></details></td></tr><tr id="test-test-long-running-export" class="mcp-trow row-timeout" data-k="test_long_running_export tests/test_performance.py timeout perf " data-ms="30000.0000" data-status="timeout" data-file="tests/test_performance.py" data-started-ms="1783368602340" data-started-iso="2026-07-06T20:10:02.340000Z"><td class="name">test_long_running_export</td><td class="tags"><span class="tagchip">perf</span></td><td class="started">2026-07-06 20:10:02 UTC</td><td><span class="badge b-timeout">TIMEOUT</span></td><td class="num" data-ms="30000.0">30000.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Test exceeded timeout of 30000ms</pre></details></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_prompts.py <span class="n">(2)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-prompts-when-available" class="mcp-trow row-skip" data-k="test_prompts_when_available tests/test_prompts.py skipped functional " data-ms="0.0000" data-status="skipped" data-file="tests/test_prompts.py" data-started-ms="1783368602106" data-started-iso="2026-07-06T20:10:02.106000Z"><td class="name">test_prompts_when_available</td><td class="tags"><span class="tagchip">functional</span></td><td class="started">2026-07-06 20:10:02 UTC</td><td><span class="badge b-skip">SKIP</span></td><td class="num" data-ms="0.0">0.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>server has no prompts capability</pre></details></td></tr><tr id="test-test-optional-bedrock-pack" class="mcp-trow row-skip" data-k="test_optional_bedrock_pack tests/test_prompts.py skipped integration " data-ms="0.0000" data-status="skipped" data-file="tests/test_prompts.py" data-started-ms="1783368602223" data-started-iso="2026-07-06T20:10:02.223000Z"><td class="name">test_optional_bedrock_pack</td><td class="tags"><span class="tagchip">integration</span></td><td class="started">2026-07-06 20:10:02 UTC</td><td><span class="badge b-skip">SKIP</span></td><td class="num" data-ms="0.0">0.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>optional extra mcp-test-harness-bedrock not installed</pre></details></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_regression.py <span class="n">(2)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-report-snapshot-stable" class="mcp-trow row-fail" data-k="test_report_snapshot_stable tests/test_regression.py failed regression snapshot " data-ms="89.0000" data-status="failed" data-file="tests/test_regression.py" data-started-ms="1783368600468" data-started-iso="2026-07-06T20:10:00.468000Z"><td class="name">test_report_snapshot_stable</td><td class="tags"><span class="tagchip">regression</span> <span class="tagchip">snapshot</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="89.0">89.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Snapshot mismatch for &#x27;generate_report&#x27;
+--- expected
++++ actual
+- {&#x27;version&#x27;: &#x27;2.0.0&#x27;}
++ {&#x27;version&#x27;: &#x27;2.0.1&#x27;}</pre></details></td></tr><tr id="test-test-tool-idempotent-calculate" class="mcp-trow row-pass" data-k="test_tool_idempotent_calculate tests/test_regression.py passed regression " data-ms="156.3000" data-status="passed" data-file="tests/test_regression.py" data-started-ms="1783368600585" data-started-iso="2026-07-06T20:10:00.585000Z"><td class="name">test_tool_idempotent_calculate</td><td class="tags"><span class="tagchip">regression</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="156.3">156.3 ms</td><td class="detail"><span class="muted">—</span></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_resiliency.py <span class="n">(6)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-degrades-gracefully-on-bad-args" class="mcp-trow row-pass" data-k="test_degrades_gracefully_on_bad_args tests/test_resiliency.py passed resiliency chaos " data-ms="72.0000" data-status="passed" data-file="tests/test_resiliency.py" data-started-ms="1783368601287" data-started-iso="2026-07-06T20:10:01.287000Z"><td class="name">test_degrades_gracefully_on_bad_args</td><td class="tags"><span class="tagchip">resiliency</span> <span class="tagchip">chaos</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="72.0">72.0 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-chaos-delay-tolerance" class="mcp-trow row-pass" data-k="test_chaos_delay_tolerance tests/test_resiliency.py passed chaos chaos:delay resiliency " data-ms="145.0000" data-status="passed" data-file="tests/test_resiliency.py" data-started-ms="1783368601404" data-started-iso="2026-07-06T20:10:01.404000Z"><td class="name">test_chaos_delay_tolerance</td><td class="tags"><span class="tagchip">chaos</span> <span class="tagchip">chaos:delay</span> <span class="tagchip">resiliency</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="145.0">145.0 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-chaos-503-unavailable" class="mcp-trow row-fail" data-k="test_chaos_503_unavailable tests/test_resiliency.py failed chaos chaos:503 resiliency " data-ms="88.0000" data-status="failed" data-file="tests/test_resiliency.py" data-started-ms="1783368601521" data-started-iso="2026-07-06T20:10:01.521000Z"><td class="name">test_chaos_503_unavailable</td><td class="tags"><span class="tagchip">chaos</span> <span class="tagchip">chaos:503</span> <span class="tagchip">resiliency</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="88.0">88.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>ChaosFaultError: simulated 503 Service Unavailable</pre></details></td></tr><tr id="test-test-chaos-schema-drift-probe" class="mcp-trow row-pass" data-k="test_chaos_schema_drift_probe tests/test_resiliency.py passed chaos chaos:schema_drift " data-ms="62.0000" data-status="passed" data-file="tests/test_resiliency.py" data-started-ms="1783368601638" data-started-iso="2026-07-06T20:10:01.638000Z"><td class="name">test_chaos_schema_drift_probe</td><td class="tags"><span class="tagchip">chaos</span> <span class="tagchip">chaos:schema_drift</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="62.0">62.0 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-survives-server-restart" class="mcp-trow row-error" data-k="test_survives_server_restart tests/test_resiliency.py error resiliency " data-ms="18.0000" data-status="error" data-file="tests/test_resiliency.py" data-started-ms="1783368601755" data-started-iso="2026-07-06T20:10:01.755000Z"><td class="name">test_survives_server_restart</td><td class="tags"><span class="tagchip">resiliency</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-error">ERROR</span></td><td class="num" data-ms="18.0">18.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>ConnectionResetError: MCP server process exited with code 1
+Traceback (most recent call last):
+  File tests/test_resiliency.py, line 44
+    await assert_tool_call(...)</pre></details></td></tr><tr id="test-test-flaky-resource-read" class="mcp-trow row-pass" data-k="test_flaky_resource_read tests/test_resiliency.py passed resiliency flaky" data-ms="340.0000" data-status="passed" data-file="tests/test_resiliency.py" data-started-ms="1783368601872" data-started-iso="2026-07-06T20:10:01.872000Z"><td class="name">test_flaky_resource_read <span class="flaky-pill">flaky</span></td><td class="tags"><span class="tagchip">resiliency</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="340.0">340.0 ms</td><td class="detail"><details class="row-detail"><summary class="row-dsum">Details</summary><pre>Attempts:
+  #1 timeout 5000.0ms read_resource timed out
+  #2 error 120.0ms 503 from upstream
+  #3 passed 88.0ms 
+Flaky: passed after 2 retry(ies).</pre></details></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_schema.py <span class="n">(1)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-schema-probe-strict" class="mcp-trow row-fail" data-k="test_schema_probe_strict tests/test_schema.py failed functional " data-ms="44.0000" data-status="failed" data-file="tests/test_schema.py" data-started-ms="1783368601989" data-started-iso="2026-07-06T20:10:01.989000Z"><td class="name">test_schema_probe_strict</td><td class="tags"><span class="tagchip">functional</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="44.0">44.0 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Schema validation failed for tool &#x27;search&#x27;
+schema: $.arguments.limit — limit must be an integer (expected &#x27;integer&#x27;, got &#x27;ten&#x27;)</pre></details></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_security.py <span class="n">(3)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-injection-payloads-blocked" class="mcp-trow row-pass" data-k="test_injection_payloads_blocked tests/test_security.py passed security " data-ms="420.7000" data-status="passed" data-file="tests/test_security.py" data-started-ms="1783368600702" data-started-iso="2026-07-06T20:10:00.702000Z"><td class="name">test_injection_payloads_blocked</td><td class="tags"><span class="tagchip">security</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="420.7">420.7 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-no-secret-leak-in-logs" class="mcp-trow row-fail" data-k="test_no_secret_leak_in_logs tests/test_security.py failed security " data-ms="55.1000" data-status="failed" data-file="tests/test_security.py" data-started-ms="1783368600819" data-started-iso="2026-07-06T20:10:00.819000Z"><td class="name">test_no_secret_leak_in_logs</td><td class="tags"><span class="tagchip">security</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="55.1">55.1 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Tool &#x27;get_config&#x27; output matched secret pattern(s): aws_key</pre></details></td></tr><tr id="test-test-path-traversal-blocked" class="mcp-trow row-pass" data-k="test_path_traversal_blocked tests/test_security.py passed security " data-ms="210.4000" data-status="passed" data-file="tests/test_security.py" data-started-ms="1783368600936" data-started-iso="2026-07-06T20:10:00.936000Z"><td class="name">test_path_traversal_blocked</td><td class="tags"><span class="tagchip">security</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="210.4">210.4 ms</td><td class="detail"><span class="muted">—</span></td></tr></tbody></table></div></details>
+<details class="file-block" open><summary class="file-sum">tests/test_server.py <span class="n">(4)</span></summary><div class="inner-table"><table class="results"><thead><tr><th>Test</th><th>Tags</th><th class="mcp-sort-started" data-dir="1" title="Click to sort by start time">Started</th><th>Status</th><th class="mcp-sort-dur" data-dir="1" title="Click to sort by duration">Duration</th><th>Details</th></tr></thead><tbody><tr id="test-test-echo-tool-returns-message" class="mcp-trow row-pass" data-k="test_echo_tool_returns_message tests/test_server.py passed smoke functional " data-ms="12.4000" data-status="passed" data-file="tests/test_server.py" data-started-ms="1783368601120" data-started-iso="2026-07-06T20:10:01.120Z"><td class="name">test_echo_tool_returns_message</td><td class="tags"><span class="tagchip">smoke</span> <span class="tagchip">functional</span></td><td class="started">2026-07-06 20:10:01 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="12.4">12.4 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-tool-schema-matches-openapi" class="mcp-trow row-pass" data-k="test_tool_schema_matches_openapi tests/test_server.py passed functional " data-ms="48.2000" data-status="passed" data-file="tests/test_server.py" data-started-ms="1783368600117" data-started-iso="2026-07-06T20:10:00.117000Z"><td class="name">test_tool_schema_matches_openapi</td><td class="tags"><span class="tagchip">functional</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="48.2">48.2 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-list-tools-includes-echo" class="mcp-trow row-pass" data-k="test_list_tools_includes_echo tests/test_server.py passed smoke " data-ms="6.8000" data-status="passed" data-file="tests/test_server.py" data-started-ms="1783368600234" data-started-iso="2026-07-06T20:10:00.234000Z"><td class="name">test_list_tools_includes_echo</td><td class="tags"><span class="tagchip">smoke</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-pass">PASS</span></td><td class="num" data-ms="6.8">6.8 ms</td><td class="detail"><span class="muted">—</span></td></tr><tr id="test-test-echo-rejects-empty-payload" class="mcp-trow row-fail" data-k="test_echo_rejects_empty_payload tests/test_server.py failed functional " data-ms="31.5000" data-status="failed" data-file="tests/test_server.py" data-started-ms="1783368600351" data-started-iso="2026-07-06T20:10:00.351000Z"><td class="name">test_echo_rejects_empty_payload</td><td class="tags"><span class="tagchip">functional</span></td><td class="started">2026-07-06 20:10:00 UTC</td><td><span class="badge b-fail">FAIL</span></td><td class="num" data-ms="31.5">31.5 ms</td><td class="detail"><details class="row-detail" open><summary class="row-dsum">Details</summary><pre>Tool &#x27;echo&#x27; response mismatch
+--- expected
++++ actual
+@@ -1,3 +1,3 @@
+ [{&quot;text&quot;: &quot;validation error&quot;, &quot;isError&quot;: true}]
++[{&quot;text&quot;: &quot;ok&quot;, &quot;isError&quot;: false}]</pre><div class="trace-block"><h4>MCP trace (4 events)</h4><p class="pollution-head">Possible stdio pollution:</p><ul><li><code>WARN: deprecated config key in stderr</code></li></ul><div class="trace-row trace-request"><span class="trace-t">0.8ms</span><span class="trace-dir">request</span><span class="trace-method">tools/call</span><span class="trace-bytes">84 B</span><pre class="trace-payload">{&#x27;name&#x27;: &#x27;echo&#x27;, &#x27;arguments&#x27;: {&#x27;message&#x27;: &#x27;ping&#x27;}}</pre></div><div class="trace-row trace-response"><span class="trace-t">3.2ms</span><span class="trace-dir">response</span><span class="trace-method">tools/call</span><span class="trace-bytes">120 B</span><pre class="trace-payload">{&#x27;content&#x27;: [{&#x27;type&#x27;: &#x27;text&#x27;, &#x27;text&#x27;: &#x27;ping&#x27;}]}</pre></div><div class="trace-row trace-request"><span class="trace-t">4.1ms</span><span class="trace-dir">request</span><span class="trace-method">tools/call</span><span class="trace-bytes">92 B</span><pre class="trace-payload">{&#x27;name&#x27;: &#x27;echo&#x27;, &#x27;arguments&#x27;: {&#x27;message&#x27;: &#x27;&#x27;}}</pre></div><div class="trace-row trace-error"><span class="trace-t">5.0ms</span><span class="trace-dir">error</span><span class="trace-method">tools/call</span><span class="trace-bytes">64 B</span> <span class="pollution">stdio pollution?</span><pre class="trace-payload">{&#x27;isError&#x27;: True, &#x27;message&#x27;: &#x27;message must be non-empty&#x27;}</pre></div></div></details></td></tr></tbody></table></div></details>
+  <div class="footer-bar">
+    <strong>Multiple formats. Maximum value.</strong>
+    <div class="footer-pills">
+      <span>Developer friendly</span><span>CI/CD ready</span>
+      <span>Data driven</span><span>Insightful reports</span>
+    </div>
+  </div>
+  <footer>Generated by <a href="https://vaquarkhan.github.io/mcp-test-harness/" target="_blank" rel="noopener noreferrer">MCP Test Harness</a> v3.0.9
+    &middot; <a href="https://vaquarkhan.github.io/mcp-test-harness/" target="_blank" rel="noopener noreferrer">Product site</a>
+    &middot; Self-contained HTML &middot; PDF via <strong>Save as PDF</strong> or <code>mcp-test export-pdf</code>
+    &middot; <code>--report-format junit|json|html</code></footer>
+</div>
+<script>
+(function(){
+  function expandForPrint(){
+    document.querySelectorAll("details.file-block, details.row-detail").forEach(function(d){ d.open = true; });
+  }
+  var pdfBtn=document.getElementById("mcp-export-pdf");
+  if(pdfBtn) pdfBtn.addEventListener("click", function(){ expandForPrint(); window.print(); });
+  window.addEventListener("beforeprint", expandForPrint);
+  var inp=document.getElementById("mcp-filter");
+  var dateFrom=document.getElementById("mcp-date-from");
+  var dateTo=document.getElementById("mcp-date-to");
+  var dateClear=document.getElementById("mcp-date-clear");
+  var durMin=document.getElementById("mcp-dur-min");
+  var durMax=document.getElementById("mcp-dur-max");
+  var durClear=document.getElementById("mcp-dur-clear");
+  var filterSummary=document.getElementById("mcp-filter-summary");
+  var statGrid=document.getElementById("mcp-stat-grid");
+  var themeBtn=document.getElementById("mcp-theme-toggle");
+  var csvBtn=document.getElementById("mcp-export-csv");
+  var shortcutToast=document.getElementById("mcp-shortcut-toast");
+  var runStartMs=1783368600000;
+  var runEndMs=1783368602340;
+  var statusFilter="all";
+  function localInputToMs(el){
+    if(!el||!el.value) return null;
+    var d=new Date(el.value);
+    return isNaN(d.getTime())?null:d.getTime();
+  }
+  function msToLocalInput(ms){
+    if(ms==null) return "";
+    var d=new Date(ms);
+    if(isNaN(d.getTime())) return "";
+    var pad=function(n){ return String(n).padStart(2,"0"); };
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+  }
+  function syncFileBlocks(){
+    document.querySelectorAll("details.file-block").forEach(function(block){
+      var visible=[].slice.call(block.querySelectorAll("tr.mcp-trow")).some(function(r){
+        return r.style.display!=="none";
+      });
+      block.style.display=visible?"":"none";
+    });
+  }
+  function updateFilterSummary(){
+    var rows=[].slice.call(document.querySelectorAll("tr.mcp-trow"));
+    var total=rows.length;
+    var visible=0;
+    var pass=0, fail=0, err=0, skip=0, to=0;
+    rows.forEach(function(r){
+      if(r.style.display==="none") return;
+      visible++;
+      var st=r.getAttribute("data-status")||"";
+      if(st==="passed") pass++;
+      else if(st==="failed") fail++;
+      else if(st==="error") err++;
+      else if(st==="skipped") skip++;
+      else if(st==="timeout") to++;
+    });
+    if(filterSummary){
+      var filtered=visible<total;
+      filterSummary.classList.toggle("filtered", filtered);
+      var parts=["Showing "+visible+" of "+total+" tests"];
+      if(filtered) parts.push(pass+" passed", (fail+err+to)+" failed/error/timeout", skip+" skipped");
+      filterSummary.textContent=parts.join(" · ");
+    }
+    if(statGrid&&visible<total){
+      statGrid.classList.add("filtered");
+      var elPass=document.getElementById("mcp-stat-pass");
+      var elFail=document.getElementById("mcp-stat-fail");
+      var elSkip=document.getElementById("mcp-stat-skip");
+      if(elPass) elPass.textContent=String(pass);
+      if(elFail) elFail.textContent=String(fail+err+to);
+      if(elSkip) elSkip.textContent=String(skip);
+    } else if(statGrid){
+      statGrid.classList.remove("filtered");
+      var elP=document.getElementById("mcp-stat-pass");
+      var elF=document.getElementById("mcp-stat-fail");
+      var elS=document.getElementById("mcp-stat-skip");
+      if(elP) elP.textContent=statGrid.getAttribute("data-pass")||elP.textContent;
+      if(elF) elF.textContent=String(
+        parseInt(statGrid.getAttribute("data-fail")||"0",10)+
+        parseInt(statGrid.getAttribute("data-error")||"0",10)+
+        parseInt(statGrid.getAttribute("data-timeout")||"0",10)
+      );
+      if(elS) elS.textContent=statGrid.getAttribute("data-skip")||elS.textContent;
+    }
+  }
+  function applyFilters(){
+    var q=inp?inp.value.toLowerCase().trim():"";
+    var fromMs=localInputToMs(dateFrom);
+    var toMs=localInputToMs(dateTo);
+    var minDur=durMin&&durMin.value?parseFloat(durMin.value):null;
+    var maxDur=durMax&&durMax.value?parseFloat(durMax.value):null;
+    document.querySelectorAll("tr.mcp-trow").forEach(function(r){
+      var k=(r.getAttribute("data-k")||"");
+      var st=r.getAttribute("data-status")||"";
+      var okStatus=(statusFilter==="all")||st===statusFilter;
+      var okSearch=(!q)||k.indexOf(q)>=0;
+      var startedRaw=r.getAttribute("data-started-ms");
+      var startedMs=startedRaw?parseInt(startedRaw,10):null;
+      var okDate=true;
+      if(fromMs!=null||toMs!=null){
+        if(startedMs==null||isNaN(startedMs)) okDate=false;
+        else {
+          if(fromMs!=null&&startedMs<fromMs) okDate=false;
+          if(toMs!=null&&startedMs>toMs) okDate=false;
+        }
+      }
+      var rowMs=parseFloat(r.getAttribute("data-ms")||"0");
+      var okDur=true;
+      if(minDur!=null&&!isNaN(minDur)&&rowMs<minDur) okDur=false;
+      if(maxDur!=null&&!isNaN(maxDur)&&rowMs>maxDur) okDur=false;
+      r.style.display=(okStatus&&okSearch&&okDate&&okDur)?"table-row":"none";
+    });
+    syncFileBlocks();
+    updateFilterSummary();
+  }
+  function clearAllFilters(){
+    if(inp) inp.value="";
+    if(dateFrom) dateFrom.value="";
+    if(dateTo) dateTo.value="";
+    if(durMin) durMin.value="";
+    if(durMax) durMax.value="";
+    statusFilter="all";
+    document.querySelectorAll(".filter-chip").forEach(function(c){
+      c.classList.toggle("active", c.getAttribute("data-status")==="all");
+    });
+    applyFilters();
+  }
+  function csvEscape(v){ return '"'+String(v||"").replace(/"/g,'""')+'"'; }
+  function csvCellText(v){
+    return String(v||"").replace(/\u2014/g,"").replace(/—/g,"").trim();
+  }
+  function startedCsvValue(r){
+    var iso=r.getAttribute("data-started-iso");
+    if(iso) return iso;
+    var ms=r.getAttribute("data-started-ms");
+    if(ms){
+      var d=new Date(parseInt(ms,10));
+      if(!isNaN(d.getTime())) return d.toISOString();
+    }
+    return "";
+  }
+  function exportVisibleCsv(){
+    var rows=[].slice.call(document.querySelectorAll("tr.mcp-trow")).filter(function(r){
+      return r.style.display!=="none";
+    });
+    var lines=["name,file,status,duration_ms,started,tags"];
+    rows.forEach(function(r){
+      var name=r.querySelector(".name");
+      var tags=r.querySelector(".tags");
+      var dur=parseFloat(r.getAttribute("data-ms")||"0");
+      lines.push([
+        csvEscape(csvCellText(name?name.textContent.replace(/flaky/g,""):"")),
+        csvEscape(csvCellText(r.getAttribute("data-file")||"")),
+        csvEscape(csvCellText(r.getAttribute("data-status")||"")),
+        csvEscape(isNaN(dur)?"":String(Math.round(dur*10)/10)),
+        csvEscape(startedCsvValue(r)),
+        csvEscape(csvCellText(tags?tags.textContent:"")),
+      ].join(","));
+    });
+    var blob=new Blob(["\ufeff"+lines.join("\n")], {type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="mcp-test-filtered.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function applyTheme(theme){
+    if(theme==="light") document.documentElement.setAttribute("data-theme","light");
+    else document.documentElement.removeAttribute("data-theme");
+    try{ localStorage.setItem("mcp-test-report-theme", theme); }catch(e){}
+    if(themeBtn) themeBtn.textContent=(theme==="light")?"Dark":"Theme";
+  }
+  function toggleTheme(){
+    var cur=document.documentElement.getAttribute("data-theme");
+    applyTheme(cur==="light"?"dark":"light");
+  }
+  function showShortcuts(){
+    if(!shortcutToast) return;
+    shortcutToast.innerHTML=(
+      "<strong>Keyboard shortcuts</strong><br>"+
+      "<kbd>/</kbd> Focus search · <kbd>Esc</kbd> Clear filters · <kbd>t</kbd> Toggle theme · <kbd>?</kbd> This help"
+    );
+    shortcutToast.classList.add("show");
+    setTimeout(function(){ shortcutToast.classList.remove("show"); }, 4500);
+  }
+  if(inp) inp.addEventListener("input", applyFilters);
+  if(dateFrom) dateFrom.addEventListener("change", applyFilters);
+  if(dateTo) dateTo.addEventListener("change", applyFilters);
+  if(durMin) durMin.addEventListener("input", applyFilters);
+  if(durMax) durMax.addEventListener("input", applyFilters);
+  if(dateClear) dateClear.addEventListener("click", function(){ if(dateFrom) dateFrom.value=""; if(dateTo) dateTo.value=""; applyFilters(); });
+  if(durClear) durClear.addEventListener("click", function(){ if(durMin) durMin.value=""; if(durMax) durMax.value=""; applyFilters(); });
+  if(csvBtn) csvBtn.addEventListener("click", exportVisibleCsv);
+  if(themeBtn) themeBtn.addEventListener("click", toggleTheme);
+  try{
+    var saved=localStorage.getItem("mcp-test-report-theme");
+    if(saved==="light") applyTheme("light");
+  }catch(e){}
+  if(dateFrom&&runStartMs!=null) dateFrom.min=msToLocalInput(runStartMs);
+  if(dateTo&&runEndMs!=null) dateTo.max=msToLocalInput(runEndMs);
+  if(dateFrom&&runEndMs!=null) dateFrom.max=msToLocalInput(runEndMs);
+  if(dateTo&&runStartMs!=null) dateTo.min=msToLocalInput(runStartMs);
+  document.addEventListener("keydown", function(ev){
+    var tag=(ev.target&&ev.target.tagName)||"";
+    if(ev.key==="/" && tag!=="INPUT" && tag!=="TEXTAREA"){ ev.preventDefault(); if(inp) inp.focus(); }
+    else if(ev.key==="Escape") clearAllFilters();
+    else if(ev.key==="?" && tag!=="INPUT") showShortcuts();
+    else if((ev.key==="t"||ev.key==="T") && tag!=="INPUT") toggleTheme();
+  });
+  applyFilters();
+  document.querySelectorAll(".filter-chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      document.querySelectorAll(".filter-chip").forEach(function(c){ c.classList.remove("active"); });
+      chip.classList.add("active");
+      statusFilter=chip.getAttribute("data-status")||"all";
+      applyFilters();
+    });
+  });
+  document.querySelectorAll("th.mcp-sort-dur, th.mcp-sort-started").forEach(function(h){
+    h.addEventListener("click", function(){
+      var table=h.closest("table"); if(!table) return;
+      var tb=table.tBodies[0]; if(!tb) return;
+      var dir=parseInt(h.getAttribute("data-dir")||"1",10);
+      var attr=h.classList.contains("mcp-sort-started")?"data-started-ms":"data-ms";
+      var rows=[].slice.call(tb.querySelectorAll("tr.mcp-trow"));
+      rows.sort(function(a,b){
+        var av=parseFloat(a.getAttribute(attr)||"0");
+        var bv=parseFloat(b.getAttribute(attr)||"0");
+        return dir*(av-bv);
+      });
+      h.setAttribute("data-dir", String(-dir));
+      rows.forEach(function(r){ tb.appendChild(r); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

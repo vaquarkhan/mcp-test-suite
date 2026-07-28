@@ -1,0 +1,21 @@
+server:
+  command: dotnet run --project src/McpServer --no-build
+  transport: stdio
+
+cases:
+  - name: .NET echo smoke
+    call: echo
+    args: { text: dotnet }
+    tags: [smoke, dotnet]
+
+  - name: .NET latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 3000
+    tags: [perf, dotnet]
+
+  - name: Missing tool rejected
+    call: __missing__
+    args: {}
+    expect_error: true
+    tags: [negative, dotnet]

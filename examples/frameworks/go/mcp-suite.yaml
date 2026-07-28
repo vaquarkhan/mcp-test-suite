@@ -1,0 +1,15 @@
+server:
+  command: go run ./cmd/server
+  transport: stdio
+
+cases:
+  - name: Go echo smoke
+    call: echo
+    args: { text: golang }
+    tags: [smoke, go]
+
+  - name: Go latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 3000
+    tags: [perf, go]

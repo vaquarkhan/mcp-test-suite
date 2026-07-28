@@ -1,0 +1,32 @@
+server:
+  # Replace with your packaged Spring Boot MCP jar
+  command: java -jar target/my-mcp-server-0.0.1-SNAPSHOT.jar
+  transport: stdio
+
+schemas:
+  EchoResponse:
+    type: object
+    properties:
+      text:
+        type: string
+    additionalProperties: true
+
+cases:
+  - name: Echo tool responds
+    call: echo
+    args:
+      text: hello-spring
+    tags: [smoke, spring-boot]
+
+  - name: Echo latency budget
+    call: echo
+    args:
+      text: ping
+    max_latency_ms: 3000
+    tags: [perf, spring-boot]
+
+  - name: Unknown tool is rejected
+    call: __missing_tool__
+    args: {}
+    expect_error: true
+    tags: [negative, spring-boot]

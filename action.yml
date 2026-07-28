@@ -1,0 +1,287 @@
+name: "MCP Test Suite"
+description: "Universal MCP server tests for any language — declarative YAML + native adapters via mcp-test engine"
+author: "Vaquar Khan"
+
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  server-command:
+    description: "Shell command to start the MCP server under test"
+    required: false
+    default: ""
+  transport:
+    description: "Transport type: stdio, sse, or http"
+    required: false
+    default: "stdio"
+  test-directory:
+    description: "Path to Python test directory (when using test_*.py)"
+    required: false
+    default: "tests/"
+  suite-file:
+    description: "Path to declarative mcp-suite.yaml (language-agnostic)"
+    required: false
+    default: ""
+  config-file:
+    description: "Path to mcp-test.yaml or mcp-test.toml"
+    required: false
+    default: ""
+  report-format:
+    description: "Reserved; Action always writes JSON for conformance outputs"
+    required: false
+    default: "json"
+  harness-version:
+    description: "Version of mcp-test-harness to install from PyPI (engine is never published from mcp-test-suite)"
+    required: false
+    default: "latest"
+  install-mode:
+    description: "How to obtain the engine: pip | docker | binary"
+    required: false
+    default: "pip"
+  docker-image:
+    description: "GHCR image when install-mode=docker"
+    required: false
+    default: "ghcr.io/vaquarkhan/mcp-test-suite:latest"
+  auto-detect-language:
+    description: "Detect package.json / pom.xml / go.mod / requirements.txt and summarize in the PR comment"
+    required: false
+    default: "true"
+  sarif-output:
+    description: "Optional path for SARIF security findings"
+    required: false
+    default: ""
+  pr-comment:
+    description: "Post run summary (including conformance level) as a PR comment"
+    required: false
+    default: "false"
+  try-mode:
+    description: "If true, run mcp-test try instead of a suite"
+    required: false
+    default: "false"
+  try-suite:
+    description: "When try-mode is true, optional experiment suite (e.g. core)"
+    required: false
+    default: ""
+
+outputs:
+  test-result:
+    description: "Test result: pass or fail"
+    value: ${{ steps.run-tests.outputs.test-result }}
+  conformance-level:
+    description: "RFC-002 conformance level name"
+    value: ${{ steps.run-tests.outputs.conformance-level }}
+  conformance-level-num:
+    description: "Numeric conformance level (-1 to 4)"
+    value: ${{ steps.run-tests.outputs.conformance-level-num }}
+  detected-language:
+    description: "Best-effort language ecosystem detected in the repo"
+    value: ${{ steps.detect.outputs.language }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Detect project language
+      id: detect
+      shell: bash
+      env:
+        AUTO: ${{ inputs.auto-detect-language }}
+      run: |
+        LANG="unknown"
+        if [ "$AUTO" != "true" ]; then
+          echo "language=$LANG" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        if [ -f package.json ]; then LANG="typescript/node"
+        elif [ -f pom.xml ] || [ -f build.gradle ] || [ -f build.gradle.kts ]; then LANG="java"
+        elif [ -f go.mod ]; then LANG="go"
+        elif [ -f Cargo.toml ]; then LANG="rust"
+        elif ls *.csproj >/dev/null 2>&1 || ls *.fsproj >/dev/null 2>&1 || [ -f global.json ]; then LANG="dotnet"
+        elif [ -f pyproject.toml ] || [ -f requirements.txt ] || [ -f setup.py ]; then LANG="python"
+        elif ls *.kt >/dev/null 2>&1 || [ -f settings.gradle.kts ]; then LANG="kotlin"
+        fi
+        # Framework hints (non-exclusive)
+        HINTS=""
+        grep -q "spring-boot\|springframework\|spring-ai" pom.xml 2>/dev/null && HINTS="${HINTS}+spring"
+        grep -q "quarkus" pom.xml 2>/dev/null && HINTS="${HINTS}+quarkus"
+        grep -q "micronaut" pom.xml build.gradle 2>/dev/null && HINTS="${HINTS}+micronaut"
+        grep -q '"@nestjs/' package.json 2>/dev/null && HINTS="${HINTS}+nestjs"
+        grep -q '"express"' package.json 2>/dev/null && HINTS="${HINTS}+express"
+        grep -q '"fastify"' package.json 2>/dev/null && HINTS="${HINTS}+fastify"
+        grep -q 'fastapi\|fastmcp\|mcp\.server' requirements.txt pyproject.toml 2>/dev/null && HINTS="${HINTS}+python-mcp"
+        [ -n "$HINTS" ] && LANG="${LANG}${HINTS}"
+        # Prefer declarative suite presence as universal
+        if [ -f mcp-suite.yaml ] || [ -f mcp-suite.yml ] || [ -n "${{ inputs.suite-file }}" ]; then
+          LANG="${LANG}+declarative"
+        fi
+        echo "language=$LANG" >> "$GITHUB_OUTPUT"
+        echo "Detected language ecosystem: $LANG"
+
+    - name: Set up Python
+      if: inputs.install-mode == 'pip'
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+      with:
+        python-version: "3.12"
+
+    - name: Install MCP Test Suite (pip)
+      if: inputs.install-mode == 'pip'
+      shell: bash
+      env:
+        HARNESS_VERSION: ${{ inputs.harness-version }}
+      run: |
+        python -m pip install --upgrade pip
+        if [ "$HARNESS_VERSION" = "latest" ]; then
+          pip install mcp-test-harness
+        else
+          pip install "mcp-test-harness==$HARNESS_VERSION"
+        fi
+        mcp-test --version
+
+    - name: Pull Docker engine image
+      if: inputs.install-mode == 'docker'
+      shell: bash
+      run: |
+        docker pull "${{ inputs.docker-image }}"
+        echo "MCP_TEST_DOCKER=${{ inputs.docker-image }}" >> "$GITHUB_ENV"
+
+    - name: Run MCP tests
+      id: run-tests
+      shell: bash
+      env:
+        INPUT_SERVER_COMMAND: ${{ inputs.server-command }}
+        INPUT_TRANSPORT: ${{ inputs.transport }}
+        INPUT_CONFIG_FILE: ${{ inputs.config-file }}
+        INPUT_SUITE_FILE: ${{ inputs.suite-file }}
+        INPUT_TEST_DIRECTORY: ${{ inputs.test-directory }}
+        INPUT_SARIF_OUTPUT: ${{ inputs.sarif-output }}
+        INPUT_PR_COMMENT: ${{ inputs.pr-comment }}
+        INPUT_TRY_MODE: ${{ inputs.try-mode }}
+        INPUT_TRY_SUITE: ${{ inputs.try-suite }}
+        INPUT_INSTALL_MODE: ${{ inputs.install-mode }}
+        DETECTED_LANG: ${{ steps.detect.outputs.language }}
+      run: |
+        set +e
+        JSON_REPORT="mcp-test-report.json"
+        EXIT_CODE=0
+
+        run_mcp() {
+          if [ "$INPUT_INSTALL_MODE" = "docker" ]; then
+            docker run --rm -v "$PWD":/work -w /work "$MCP_TEST_DOCKER" "$@"
+          else
+            mcp-test "$@"
+          fi
+        }
+
+        if [ "$INPUT_TRY_MODE" = "true" ]; then
+          TRY_ARGS=(try --transport "$INPUT_TRANSPORT" --report-format json --report-output "$JSON_REPORT")
+          [ -n "$INPUT_SERVER_COMMAND" ] && TRY_ARGS+=(--server-command "$INPUT_SERVER_COMMAND")
+          [ -n "$INPUT_CONFIG_FILE" ] && TRY_ARGS+=(--config "$INPUT_CONFIG_FILE")
+          [ -n "$INPUT_TRY_SUITE" ] && TRY_ARGS+=(--suite "$INPUT_TRY_SUITE")
+          run_mcp "${TRY_ARGS[@]}"
+          EXIT_CODE=$?
+        elif [ -n "$INPUT_SUITE_FILE" ] || [ -f mcp-suite.yaml ] || [ -f mcp-suite.yml ]; then
+          SUITE="${INPUT_SUITE_FILE:-mcp-suite.yaml}"
+          [ -f mcp-suite.yml ] && [ ! -f "$SUITE" ] && SUITE="mcp-suite.yml"
+          ARGS=(run --suite "$SUITE" --transport "$INPUT_TRANSPORT" --report-format json --report-output "$JSON_REPORT")
+          [ -n "$INPUT_SERVER_COMMAND" ] && ARGS+=(--server-command "$INPUT_SERVER_COMMAND")
+          [ -n "$INPUT_CONFIG_FILE" ] && ARGS+=(--config "$INPUT_CONFIG_FILE")
+          [ "$INPUT_PR_COMMENT" = "true" ] && ARGS+=(--pr-summary-output "mcp-pr-summary.md")
+          run_mcp "${ARGS[@]}"
+          EXIT_CODE=$?
+        else
+          ARGS=(--transport "$INPUT_TRANSPORT" --report-format json --report-output "$JSON_REPORT")
+          [ -n "$INPUT_SERVER_COMMAND" ] && ARGS+=(--server-command "$INPUT_SERVER_COMMAND")
+          [ -n "$INPUT_CONFIG_FILE" ] && ARGS+=(--config "$INPUT_CONFIG_FILE")
+          if [ -n "$INPUT_SARIF_OUTPUT" ]; then
+            ARGS+=(--sarif-output "$INPUT_SARIF_OUTPUT")
+          else
+            ARGS+=(--sarif-output "mcp-security.sarif")
+          fi
+          [ "$INPUT_PR_COMMENT" = "true" ] && ARGS+=(--pr-summary-output "mcp-pr-summary.md")
+          ARGS+=("$INPUT_TEST_DIRECTORY")
+          run_mcp "${ARGS[@]}"
+          EXIT_CODE=$?
+        fi
+
+        LEVEL="None"
+        LEVEL_NUM="-1"
+        if [ -f "$JSON_REPORT" ]; then
+          LEVEL=$(python -c "import json; d=json.load(open('$JSON_REPORT',encoding='utf-8')); c=(d.get('unified_summary') or {}).get('conformance') or d.get('conformance') or {}; print(c.get('name') or 'None')" 2>/dev/null || echo None)
+          LEVEL_NUM=$(python -c "import json; d=json.load(open('$JSON_REPORT',encoding='utf-8')); c=(d.get('unified_summary') or {}).get('conformance') or d.get('conformance') or {}; print(c.get('level', -1))" 2>/dev/null || echo -1)
+        fi
+        echo "conformance-level=$LEVEL" >> "$GITHUB_OUTPUT"
+        echo "conformance-level-num=$LEVEL_NUM" >> "$GITHUB_OUTPUT"
+        echo "Detected: $DETECTED_LANG | Conformance: $LEVEL (level $LEVEL_NUM)"
+
+        if [ "$EXIT_CODE" -eq 0 ]; then
+          echo "test-result=pass" >> "$GITHUB_OUTPUT"
+        else
+          echo "test-result=fail" >> "$GITHUB_OUTPUT"
+        fi
+
+        # GitHub Job Summary
+        {
+          echo "## MCP Test Suite"
+          echo ""
+          echo "| Field | Value |"
+          echo "|-------|-------|"
+          echo "| Language | \`$DETECTED_LANG\` |"
+          echo "| Result | $( [ "$EXIT_CODE" -eq 0 ] && echo pass || echo fail ) |"
+          echo "| Conformance | $LEVEL ($LEVEL_NUM) |"
+        } >> "$GITHUB_STEP_SUMMARY"
+
+        exit "$EXIT_CODE"
+
+    - name: Upload JSON report (conformance)
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+      with:
+        name: mcp-test-json
+        path: mcp-test-report.json
+        if-no-files-found: ignore
+
+    - name: Upload SARIF for code scanning
+      if: always() && inputs.try-mode != 'true'
+      uses: github/codeql-action/upload-sarif@main
+      with:
+        sarif_file: ${{ inputs.sarif-output != '' && inputs.sarif-output || 'mcp-security.sarif' }}
+        category: mcp-test-suite
+      continue-on-error: true
+
+    - name: Post PR summary comment
+      if: always() && inputs.pr-comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+      with:
+        script: |
+          const fs = require('fs');
+          const lang = '${{ steps.detect.outputs.language }}';
+          const path = 'mcp-pr-summary.md';
+          let body = '';
+          if (fs.existsSync(path)) {
+            body = fs.readFileSync(path, 'utf8');
+          } else if (fs.existsSync('mcp-test-report.json')) {
+            const d = JSON.parse(fs.readFileSync('mcp-test-report.json', 'utf8'));
+            const c = (d.unified_summary || {}).conformance || d.conformance || {};
+            body = `## MCP Test Suite — Conformance\n\n**Language:** \`${lang}\`\n\n**Level:** ${c.name || 'None'} (${c.level ?? '—'})\n`;
+            if (c.badge && c.badge.markdown) body += `\n${c.badge.markdown}\n`;
+          } else {
+            core.info('No PR summary or JSON report; skipping comment.');
+            return;
+          }
+          const marker = '<!-- mcp-test-suite-summary -->';
+          const fullBody = marker + '\n' + body;
+          const { owner, repo } = context.repo;
+          const issue_number = context.payload.pull_request.number;
+          const { data: comments } = await github.rest.issues.listComments({
+            owner, repo, issue_number,
+          });
+          const existing = comments.find(c => c.body && c.body.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner, repo, comment_id: existing.id, body: fullBody,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner, repo, issue_number, body: fullBody,
+            });
+          }

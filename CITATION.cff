@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: >-
+  If you use or build on MCP Test Harness, consider citing it (optional).
+  The project is under the MIT License. This file provides consistent
+  bibliographic data for papers and reports.
+type: software
+title: "MCP Test Harness"
+version: 3.0.9
+abstract: >-
+  A pytest-style testing framework for Model Context Protocol (MCP) servers
+  (automated discovery, assertions, CI reporting, transports).
+authors:
+  - family-names: Khan
+    given-names: Vaquar
+    email: vaquarkhan@gmail.com
+repository-code: "https://github.com/vaquarkhan/mcp-test-harness"
+url: "https://github.com/vaquarkhan/mcp-test-harness"
+license: MIT
+date-released: 2026-04-25
+keywords:
+  - mcp
+  - model-context-protocol
+  - testing
+  - quality-assurance
+preferred-citation:
+  type: software
+  title: "MCP Test Harness"
+  year: 2024
+  url: "https://github.com/vaquarkhan/mcp-test-harness"
+  authors:
+    - family-names: Khan
+      given-names: Vaquar

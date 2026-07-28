@@ -1,0 +1,96 @@
+name: Publish language adapters
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Adapter to publish"
+        required: true
+        type: choice
+        options:
+          - junit5
+          - jest
+          - xunit
+          - all
+      dry_run:
+        description: "Build only (no publish)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  junit5:
+    if: inputs.target == 'junit5' || inputs.target == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
+          gpg-passphrase: JRELEASER_GPG_PASSPHRASE
+      - name: Build / deploy Maven Central
+        working-directory: adapters/junit5
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            mvn -B -DskipTests clean package
+          else
+            mvn -B -DskipTests -Prelease clean deploy
+          fi
+
+  jest:
+    if: inputs.target == 'jest' || inputs.target == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+      - name: Build / publish npm
+        working-directory: adapters/jest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm ci || npm install
+          npm run build
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm pack
+          else
+            npm publish --access public
+          fi
+
+  xunit:
+    if: inputs.target == 'xunit' || inputs.target == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Pack / push NuGet
+        working-directory: adapters/xunit
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet pack -c Release -o ../../dist/nuget
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ls -la ../../dist/nuget
+          else
+            dotnet nuget push ../../dist/nuget/*.nupkg \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          fi

@@ -1,0 +1,15 @@
+server:
+  command: python server.py
+  transport: stdio
+
+cases:
+  - name: FastMCP echo
+    call: echo
+    args: { text: fastmcp }
+    tags: [smoke, fastmcp]
+
+  - name: FastMCP latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 2000
+    tags: [perf, fastmcp]

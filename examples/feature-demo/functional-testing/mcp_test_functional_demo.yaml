@@ -1,0 +1,12 @@
+server:
+  command: "python -m your_server"
+
+schema_validation: true
+
+test:
+  dirs:
+    - "examples/feature-demo/functional-testing"
+
+report:
+  format: html
+  output: "examples/feature-demo/functional-testing/reports/functional-demo.html"

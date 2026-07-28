@@ -1,0 +1,10 @@
+server:
+  command: "python -m your_server"
+
+test:
+  dirs:
+    - "examples/feature-demo/usa-interest"
+
+report:
+  format: html
+  output: "examples/feature-demo/usa-interest/reports/usa-interest-demo.html"

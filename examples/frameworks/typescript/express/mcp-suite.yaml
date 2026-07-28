@@ -1,0 +1,15 @@
+server:
+  command: node dist/server.js
+  transport: stdio
+
+cases:
+  - name: Express echo smoke
+    call: echo
+    args: { message: express }
+    tags: [smoke, express]
+
+  - name: Express latency
+    call: echo
+    args: { message: ping }
+    max_latency_ms: 2000
+    tags: [perf, express]

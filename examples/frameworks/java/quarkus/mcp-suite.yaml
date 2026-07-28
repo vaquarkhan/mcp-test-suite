@@ -1,0 +1,15 @@
+server:
+  command: java -jar target/quarkus-app/quarkus-run.jar
+  transport: stdio
+
+cases:
+  - name: Quarkus echo smoke
+    call: echo
+    args: { message: quarkus }
+    tags: [smoke, quarkus]
+
+  - name: Quarkus latency
+    call: echo
+    args: { message: ping }
+    max_latency_ms: 3000
+    tags: [perf, quarkus]

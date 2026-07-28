@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>McpTestSuite.Xunit</RootNamespace>
+    <AssemblyName>McpTestSuite.Xunit</AssemblyName>
+    <PackageId>McpTestSuite.Xunit</PackageId>
+    <Version>4.0.0</Version>
+    <Authors>Vaquar Khan</Authors>
+    <Company>vaquarkhan</Company>
+    <Description>xUnit adapter for mcp-test-suite — orchestrates the mcp-test CLI</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/vaquarkhan/mcp-test-suite</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vaquarkhan/mcp-test-suite</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>mcp;mcp-test-suite;xunit;testing;aspnet</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

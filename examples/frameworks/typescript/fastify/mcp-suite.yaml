@@ -1,0 +1,15 @@
+server:
+  command: node dist/server.js
+  transport: stdio
+
+cases:
+  - name: Fastify echo smoke
+    call: echo
+    args: { text: fastify }
+    tags: [smoke, fastify]
+
+  - name: Fastify latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 2000
+    tags: [perf, fastify]

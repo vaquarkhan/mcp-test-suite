@@ -1,0 +1,15 @@
+server:
+  command: java -jar build/libs/ktor-mcp.jar
+  transport: stdio
+
+cases:
+  - name: Ktor echo smoke
+    call: echo
+    args: { text: ktor }
+    tags: [smoke, ktor]
+
+  - name: Ktor latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 3000
+    tags: [perf, ktor]

@@ -1,0 +1,37 @@
+# mcp-suite.yaml — language-agnostic MCP tests
+#
+# Go, Java, TypeScript, and Python developers share this file.
+# Run: mcp-test run --suite mcp-suite.yaml
+#   or: mcp-test --config mcp-test.yaml   (auto-discovers *.suite.yaml)
+
+server:
+  command: python tests/fixtures/minimal_mcp_server.py
+  transport: stdio
+
+schemas:
+  EchoText:
+    type: object
+    properties:
+      text:
+        type: string
+    additionalProperties: true
+
+cases:
+  - name: Echo tool responds
+    call: echo
+    args:
+      text: hello
+    tags: [smoke]
+
+  - name: Echo under latency budget
+    call: echo
+    args:
+      text: ping
+    max_latency_ms: 2000
+    tags: [perf]
+
+  - name: Unknown tool fails
+    call: __does_not_exist__
+    args: {}
+    expect_error: true
+    tags: [negative]

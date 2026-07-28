@@ -1,0 +1,15 @@
+server:
+  command: http://127.0.0.1:8000/mcp
+  transport: http
+
+cases:
+  - name: FastAPI MCP echo over HTTP
+    call: echo
+    args: { text: fastapi }
+    tags: [smoke, fastapi]
+
+  - name: FastAPI latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 2000
+    tags: [perf, fastapi]

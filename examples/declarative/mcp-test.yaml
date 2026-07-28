@@ -1,0 +1,11 @@
+server:
+  command: python tests/fixtures/minimal_mcp_server.py
+  transport: stdio
+
+test:
+  dirs: [.]
+  timeout: 30
+
+report:
+  format: json
+  output: reports/declarative-results.json

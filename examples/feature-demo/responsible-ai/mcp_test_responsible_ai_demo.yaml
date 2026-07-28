@@ -1,0 +1,10 @@
+server:
+  command: "python -m your_server"
+
+test:
+  dirs:
+    - "examples/feature-demo/responsible-ai"
+
+report:
+  format: html
+  output: "examples/feature-demo/responsible-ai/reports/responsible-ai-demo.html"

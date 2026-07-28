@@ -1,0 +1,105 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-test-suite"
+version = "4.0.0"
+description = "MCP Test Suite -- multi-language adapters and declarative tests. NOTE: Do not publish this project to PyPI from this repo; the mcp-test engine is published as mcp-test-harness from vaquarkhan/mcp-test-harness."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Vaquar Khan", email = "vaquarkhan@gmail.com"}]
+keywords = ["mcp", "mcp-test-suite", "mcp-test", "testing", "model-context-protocol", "test-harness", "json-rpc", "jest", "junit", "golang"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = [
+  "mcp>=1.0.0",
+  "anyio>=4.0.0",
+  "pyyaml>=6.0",
+]
+
+[project.scripts]
+mcp-test = "mcp_test_harness.cli:main"
+
+[project.optional-dependencies]
+# Pins MCP-Bastion for the mcplint shim (optional; core harness does not need it)
+mcplint = [
+  "mcp-bastion-python>=1.0.12",
+]
+bedrock = [
+  "mcp-bastion-bedrock>=0.1.0",
+]
+dev = [
+  "mcp-bastion-python>=1.0.12",
+  "pytest>=7.0.0",
+  "pytest-asyncio>=0.21.0",
+  "jsonschema>=4.0.0",
+  "pyinstaller>=6.0.0",
+  "coverage>=7.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/vaquarkhan/mcp-test-suite"
+Repository = "https://github.com/vaquarkhan/mcp-test-suite"
+Documentation = "https://github.com/vaquarkhan/mcp-test-suite#readme"
+Changelog = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/CHANGELOG.md"
+Docker = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/DOCKER.md"
+Architecture = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/ARCHITECTURE.md"
+Editors = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/EDITORS.md"
+MultiLanguage = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/MULTI_LANGUAGE.md"
+CursorIDE = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/CURSOR_IDE.md"
+Collections = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/COLLECTIONS.md"
+Releasing = "https://github.com/vaquarkhan/mcp-test-suite/blob/main/docs/RELEASING.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcplint", "src/mcp_test_harness"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/mcplint",
+  "src/mcp_test_harness",
+  "README.md",
+  "CHANGELOG.md",
+  "CONTRIBUTING.md",
+  "LICENSE",
+  "NOTICE",
+  "CITATION.cff",
+  "server.json",
+  "docs",
+  "scripts",
+  "examples",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+addopts = "--ignore=tests/fixtures/harness_self_test --ignore=tests/fixtures/harness_seam_test"
+markers = [
+  "e2e: end-to-end dogfood tests (subprocess mcp-test CLI against real MCP server)",
+]
+
+# 100% line gate on the harness package.
+[tool.coverage.run]
+source = ["src/mcp_test_harness"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_empty = true
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "if typing.TYPE_CHECKING:",
+  "^\\s+\\.\\.\\.$",
+]

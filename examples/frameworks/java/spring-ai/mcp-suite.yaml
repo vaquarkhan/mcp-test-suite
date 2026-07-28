@@ -1,0 +1,23 @@
+server:
+  command: mvn -q spring-boot:run
+  transport: stdio
+
+cases:
+  - name: List-backed weather tool
+    call: getWeather
+    args:
+      city: Chicago
+    tags: [smoke, spring-ai]
+
+  - name: Tool latency SLO
+    call: getWeather
+    args:
+      city: NYC
+    max_latency_ms: 5000
+    tags: [perf, spring-ai]
+
+  - name: Invalid tool name rejected
+    call: notARealTool
+    args: {}
+    expect_error: true
+    tags: [negative, spring-ai]

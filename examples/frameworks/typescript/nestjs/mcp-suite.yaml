@@ -1,0 +1,21 @@
+server:
+  command: node dist/main.js
+  transport: stdio
+
+cases:
+  - name: NestJS echo smoke
+    call: echo
+    args: { text: nest }
+    tags: [smoke, nestjs]
+
+  - name: NestJS latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 2000
+    tags: [perf, nestjs]
+
+  - name: Missing tool rejected
+    call: __nope__
+    args: {}
+    expect_error: true
+    tags: [negative, nestjs]

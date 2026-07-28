@@ -1,0 +1,15 @@
+server:
+  command: ./target/release/mcp-server
+  transport: stdio
+
+cases:
+  - name: Rust echo smoke
+    call: echo
+    args: { text: rust }
+    tags: [smoke, rust]
+
+  - name: Rust latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 2000
+    tags: [perf, rust]

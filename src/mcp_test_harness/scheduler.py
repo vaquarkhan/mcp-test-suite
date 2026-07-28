@@ -1,0 +1,571 @@
+"""Test scheduler for the MCP Test Harness.
+
+Handles sequential and parallel test execution. Sequential mode uses a
+single server instance and runs tests one at a time. Parallel mode
+distributes tests across multiple workers, each with its own server
+instance and transport connection.
+
+Requirements: 13.1, 13.2, 13.3, 13.4, 13.5
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import os
+import time
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from mcp_test_harness.config import HarnessConfig
+from mcp_test_harness.coverage import (
+    capture_advertised_inventory,
+    coverage_to_dict,
+    get_coverage,
+    merge_states,
+)
+from mcp_test_harness.discovery import HarnessCase
+from mcp_test_harness.executor import CaseExecutor
+from mcp_test_harness.fixtures import (
+    FixtureManager,
+    FixtureScope,
+    register_builtin_fixtures,
+    register_decorated_fixtures,
+)
+from mcp_test_harness.lifecycle import ManagedServer, ServerCrashedError, ServerLifecycleManager, StartupError
+from mcp_test_harness.models import CaseResult, SessionResults, CaseStatus
+from mcp_test_harness.conformance import attach_conformance
+from mcp_test_harness.unified_report import build_unified_summary
+from mcp_test_harness.schema import SchemaValidator, validate_mcp_server_after_connect
+
+logger = logging.getLogger(__name__)
+
+from mcp_test_harness import __version__ as _HARNESS_VERSION
+
+_FAIL_FAST_SKIP = "Not run (--fail-fast) after an earlier failure."
+
+
+def _status_stops_run(status: CaseStatus) -> bool:
+    return status in (CaseStatus.FAILED, CaseStatus.ERROR, CaseStatus.TIMEOUT)
+
+
+def _lpt_assign_modules(
+    module_chunks: list[list[HarnessCase]], worker_count: int
+) -> list[list[HarnessCase]]:
+    """Assign whole-module chunks to workers using a greedy LPT (largest-first) balance."""
+    n_workers = max(1, worker_count)
+    if not module_chunks:
+        return []
+    chunks = sorted(module_chunks, key=lambda ch: -len(ch))
+    bucket_load = [0] * n_workers
+    buckets: list[list[HarnessCase]] = [[] for _ in range(n_workers)]
+    for chunk in chunks:
+        w = min(range(n_workers), key=lambda j: bucket_load[j])
+        buckets[w].extend(chunk)
+        bucket_load[w] += len(chunk)
+    return [b for b in buckets if b]
+
+
+def _utc_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _build_environment(config: HarnessConfig) -> dict[str, str]:
+    import platform
+    import sys
+
+    return {
+        "python_version": sys.version.split()[0],
+        "platform": platform.platform(),
+        "cwd": os.getcwd(),
+        "server_command": config.server_command or "",
+        "transport": str(config.transport),
+    }
+
+
+async def _assert_mcp_compliance(
+    config: HarnessConfig,
+    server: ManagedServer,
+    *,
+    worker_id: int = 0,
+) -> None:
+    """Run optional MCP shape / tool-schema checks; raise on failure (caller shuts down)."""
+    if not config.schema_validation:
+        return
+    if (
+        config.parallel
+        and not config.validate_schema_each_parallel_worker
+        and worker_id != 0
+    ):
+        return
+    viol = await validate_mcp_server_after_connect(
+        server.session,
+        server.init_result,
+        SchemaValidator(True),
+        schema_probe_call_tool=config.schema_probe_call_tool,
+    )
+    if not viol:
+        return
+    msg = "; ".join(v.message for v in viol[:15])
+    raise StartupError(f"MCP protocol validation failed: {msg}")
+
+
+class HarnessScheduler:
+    """Schedule and execute test cases sequentially or in parallel.
+
+    Sequential mode (Req 13.5): starts one server, runs all tests through
+    the executor one at a time, then shuts down.
+
+    Parallel mode (Req 13.1, 13.2): creates N workers, each with its own
+    server instance. Tests are distributed across workers and executed
+    concurrently. Results are aggregated into a single ``SessionResults``.
+    """
+
+    async def run_sequential(
+        self,
+        test_cases: list[HarnessCase],
+        config: HarnessConfig,
+        plugin_registry: object | None = None,
+        *,
+        fail_fast: bool = False,
+    ) -> SessionResults:
+        """Run tests one at a time with a single server instance.
+
+        Parameters
+        ----------
+        test_cases:
+            The discovered test cases to execute.
+        config:
+            The harness configuration.
+
+        Returns
+        -------
+        SessionResults
+            Aggregated results for the entire run.
+        """
+        start_time = time.monotonic()
+        run_started = _utc_iso()
+        results: list[CaseResult] = []
+        capabilities: dict = {}
+        protocol_version = ""
+
+        # Sort so all tests from the same file run together, then by @marker order.
+        test_cases = sorted(
+            test_cases,
+            key=lambda tc: (str(tc.module_path), tc.markers.get("order", 0), tc.name),
+        )
+
+        lifecycle = ServerLifecycleManager()
+        server: ManagedServer | None = None
+
+        try:
+            server = await lifecycle.start(config)
+            await _assert_mcp_compliance(config, server, worker_id=0)
+            await capture_advertised_inventory(server.session)
+            capabilities = server.capabilities
+            protocol_version = (
+                ServerLifecycleManager.protocol_version_from_init(server.init_result)
+                or str(capabilities.get("protocolVersion") or "")
+            )
+            lifecycle.start_monitor(server)
+
+            executor = CaseExecutor(default_timeout=config.timeout)
+            fixtures = FixtureManager()
+            register_builtin_fixtures(fixtures)
+            register_decorated_fixtures(fixtures)
+            if plugin_registry is not None and hasattr(plugin_registry, "register_fixtures"):
+                plugin_registry.register_fixtures(fixtures)
+
+            for i, test_case in enumerate(test_cases):
+                try:
+                    result = await executor.execute(test_case, server, fixtures)
+                except ServerCrashedError as exc:
+                    logger.error("Server crashed during test '%s': %s", test_case.name, exc)
+                    result = CaseResult(
+                        name=test_case.name,
+                        module=str(test_case.module_path),
+                        status=CaseStatus.ERROR,
+                        duration_ms=0.0,
+                        error=f"Server crashed: {exc}",
+                        file=Path(test_case.module_path).as_posix(),
+                        tags=list(test_case.markers.get("tags", [])),
+                    )
+                    results.append(result)
+                    # Mark remaining tests as errored
+                    remaining = test_cases[i + 1 :]
+                    for remaining_tc in remaining:
+                        results.append(
+                            CaseResult(
+                                name=remaining_tc.name,
+                                module=str(remaining_tc.module_path),
+                                status=CaseStatus.ERROR,
+                                duration_ms=0.0,
+                                error="Server crashed before this test could run",
+                                file=Path(remaining_tc.module_path).as_posix(),
+                                tags=list(remaining_tc.markers.get("tags", [])),
+                            )
+                        )
+                    break
+                else:
+                    results.append(result)
+                    if fail_fast and _status_stops_run(result.status):
+                        for remaining_tc in test_cases[i + 1 :]:
+                            results.append(
+                                CaseResult(
+                                    name=remaining_tc.name,
+                                    module=str(remaining_tc.module_path),
+                                    status=CaseStatus.SKIPPED,
+                                    duration_ms=0.0,
+                                    error=_FAIL_FAST_SKIP,
+                                    file=Path(remaining_tc.module_path).as_posix(),
+                                    tags=list(remaining_tc.markers.get("tags", [])),
+                                )
+                            )
+                        break
+
+                # Teardown per-module fixtures between modules
+                if i < len(test_cases) - 1 and test_case.module_path != test_cases[i + 1].module_path:
+                    await fixtures.teardown(FixtureScope.PER_MODULE)
+
+            # Final per-module teardown
+            await fixtures.teardown(FixtureScope.PER_MODULE)
+
+        except Exception as exc:
+            logger.error("Failed to start server: %s", exc)
+            # Mark all tests as errored
+            for tc in test_cases:
+                results.append(
+                    CaseResult(
+                        name=tc.name,
+                        module=str(tc.module_path),
+                        status=CaseStatus.ERROR,
+                        duration_ms=0.0,
+                        error=f"Server startup failed: {exc}",
+                        file=Path(tc.module_path).as_posix(),
+                        tags=list(tc.markers.get("tags", [])),
+                    )
+                )
+        finally:
+            if server is not None:
+                await lifecycle.shutdown(server)
+
+        total_duration_ms = (time.monotonic() - start_time) * 1000.0
+        run_finished = _utc_iso()
+        cov_dict: dict[str, Any] = {}
+        if server is not None:
+            cov_dict = coverage_to_dict(get_coverage(server.session))
+        return _aggregate_results(
+            results,
+            total_duration_ms,
+            capabilities,
+            protocol_version,
+            started_at=run_started,
+            finished_at=run_finished,
+            environment=_build_environment(config),
+            coverage=cov_dict,
+        )
+
+    async def run_parallel(
+        self,
+        test_cases: list[HarnessCase],
+        config: HarnessConfig,
+        workers: int | None = None,
+        plugin_registry: object | None = None,
+        *,
+        fail_fast: bool = False,
+    ) -> SessionResults:
+        """Run tests across multiple workers, each with its own server.
+
+        Parameters
+        ----------
+        test_cases:
+            The discovered test cases to execute.
+        config:
+            The harness configuration.
+        workers:
+            Number of parallel workers. Defaults to ``os.cpu_count()``.
+
+        Returns
+        -------
+        SessionResults
+            Aggregated results from all workers.
+        """
+        start_time = time.monotonic()
+        run_started = _utc_iso()
+        worker_count = workers or os.cpu_count() or 1
+
+        if not test_cases:
+            total_duration_ms = (time.monotonic() - start_time) * 1000.0
+            now = _utc_iso()
+            return _aggregate_results(
+                [],
+                total_duration_ms,
+                {},
+                "",
+                started_at=now,
+                finished_at=now,
+                environment=_build_environment(config),
+            )
+
+        # Group by module so per-module fixtures (e.g. mcp_server_session) stay
+        # coherent within one worker, then round-robin whole modules.
+        by_mod: dict[Any, list[HarnessCase]] = defaultdict(list)
+        module_order: list[Any] = []
+        for tc in test_cases:
+            key = tc.module_path
+            if key not in by_mod:
+                module_order.append(key)
+            by_mod[key].append(tc)
+        for k in module_order:
+            by_mod[k] = sorted(
+                by_mod[k], key=lambda t: t.markers.get("order", 0)
+            )
+
+        module_chunks: list[list[HarnessCase]] = []
+        for k in module_order:
+            module_chunks.append(by_mod[k])
+
+        buckets = _lpt_assign_modules(module_chunks, worker_count)
+
+        fail_stop: asyncio.Event | None = asyncio.Event() if fail_fast else None
+        # Run all workers concurrently
+        worker_tasks = [
+            self._run_worker(
+                bucket,
+                config,
+                worker_id=idx,
+                plugin_registry=plugin_registry,
+                fail_stop=fail_stop,
+                fail_fast=fail_fast,
+            )
+            for idx, bucket in enumerate(buckets)
+        ]
+        worker_results = await asyncio.gather(*worker_tasks, return_exceptions=False)
+
+        # Aggregate
+        all_results: list[CaseResult] = []
+        capabilities: dict = {}
+        protocol_version = ""
+        coverage_states: list[Any] = []
+
+        for wr in worker_results:
+            all_results.extend(wr.results)
+            if wr.capabilities:
+                capabilities = wr.capabilities
+            if wr.protocol_version:
+                protocol_version = wr.protocol_version
+            if wr.coverage_state is not None:
+                coverage_states.append(wr.coverage_state)
+
+        cov_dict = coverage_to_dict(merge_states(*coverage_states)) if coverage_states else {}
+
+        total_duration_ms = (time.monotonic() - start_time) * 1000.0
+        run_finished = _utc_iso()
+        return _aggregate_results(
+            all_results,
+            total_duration_ms,
+            capabilities,
+            protocol_version,
+            started_at=run_started,
+            finished_at=run_finished,
+            environment=_build_environment(config),
+            coverage=cov_dict,
+        )
+
+    # ------------------------------------------------------------------
+    # Internal: single worker
+    # ------------------------------------------------------------------
+
+    async def _run_worker(
+        self,
+        test_cases: list[HarnessCase],
+        config: HarnessConfig,
+        worker_id: int,
+        plugin_registry: object | None = None,
+        *,
+        fail_stop: asyncio.Event | None = None,
+        fail_fast: bool = False,
+    ) -> _WorkerResult:
+        """Run a batch of tests on a dedicated server instance.
+
+        If the server crashes, affected tests are marked as errored and
+        the worker stops (Req 13.4). Other workers continue independently.
+        """
+        results: list[CaseResult] = []
+        capabilities: dict = {}
+        protocol_version = ""
+
+        # Same ordering as :meth:`run_sequential`: module path, then order, then name.
+        test_cases = sorted(
+            test_cases,
+            key=lambda tc: (str(tc.module_path), tc.markers.get("order", 0), tc.name),
+        )
+
+        lifecycle = ServerLifecycleManager()
+        server: ManagedServer | None = None
+        coverage_state: Any = None
+
+        try:
+            server = await lifecycle.start(config)
+            await _assert_mcp_compliance(config, server, worker_id=worker_id)
+            await capture_advertised_inventory(server.session)
+            capabilities = server.capabilities
+            protocol_version = (
+                ServerLifecycleManager.protocol_version_from_init(server.init_result)
+                or str(capabilities.get("protocolVersion") or "")
+            )
+            lifecycle.start_monitor(server)
+
+            executor = CaseExecutor(default_timeout=config.timeout)
+            fixtures = FixtureManager()
+            register_builtin_fixtures(fixtures)
+            register_decorated_fixtures(fixtures)
+            if plugin_registry is not None and hasattr(plugin_registry, "register_fixtures"):
+                plugin_registry.register_fixtures(fixtures)
+
+            for i, test_case in enumerate(test_cases):
+                if fail_stop is not None and fail_stop.is_set():
+                    for remaining_tc in test_cases[i:]:
+                        results.append(
+                            CaseResult(
+                                name=remaining_tc.name,
+                                module=str(remaining_tc.module_path),
+                                status=CaseStatus.SKIPPED,
+                                duration_ms=0.0,
+                                error=_FAIL_FAST_SKIP,
+                                file=Path(remaining_tc.module_path).as_posix(),
+                                tags=list(remaining_tc.markers.get("tags", [])),
+                            )
+                        )
+                    break
+                try:
+                    result = await executor.execute(test_case, server, fixtures)
+                except ServerCrashedError as exc:
+                    logger.error(
+                        "Worker %d: server crashed during test '%s': %s",
+                        worker_id,
+                        test_case.name,
+                        exc,
+                    )
+                    result = CaseResult(
+                        name=test_case.name,
+                        module=str(test_case.module_path),
+                        status=CaseStatus.ERROR,
+                        duration_ms=0.0,
+                        error=f"Server crashed: {exc}",
+                        file=Path(test_case.module_path).as_posix(),
+                        tags=list(test_case.markers.get("tags", [])),
+                    )
+                    results.append(result)
+                    # Mark remaining tests in this worker as errored
+                    remaining = test_cases[i + 1 :]
+                    for remaining_tc in remaining:
+                        results.append(
+                            CaseResult(
+                                name=remaining_tc.name,
+                                module=str(remaining_tc.module_path),
+                                status=CaseStatus.ERROR,
+                                duration_ms=0.0,
+                                error="Server crashed before this test could run",
+                                file=Path(remaining_tc.module_path).as_posix(),
+                                tags=list(remaining_tc.markers.get("tags", [])),
+                            )
+                        )
+                    if fail_fast and fail_stop is not None:
+                        fail_stop.set()
+                    break
+                else:
+                    results.append(result)
+                    if fail_fast and fail_stop is not None and _status_stops_run(result.status):
+                        fail_stop.set()
+                # Per-module fixture teardown when the next test is a different file
+                # (same rule as :meth:`run_sequential`).
+                if i < len(test_cases) - 1 and test_case.module_path != test_cases[i + 1].module_path:
+                    await fixtures.teardown(FixtureScope.PER_MODULE)
+
+            # Final per-module teardown for the last file in this worker
+            await fixtures.teardown(FixtureScope.PER_MODULE)
+
+        except Exception as exc:
+            logger.error("Worker %d: failed to start server: %s", worker_id, exc)
+            for tc in test_cases:
+                results.append(
+                    CaseResult(
+                        name=tc.name,
+                        module=str(tc.module_path),
+                        status=CaseStatus.ERROR,
+                        duration_ms=0.0,
+                        error=f"Worker {worker_id} server startup failed: {exc}",
+                        file=Path(tc.module_path).as_posix(),
+                        tags=list(tc.markers.get("tags", [])),
+                    )
+                )
+        finally:
+            if server is not None:
+                coverage_state = get_coverage(server.session)
+                await lifecycle.shutdown(server)
+
+        return _WorkerResult(
+            results=results,
+            capabilities=capabilities,
+            protocol_version=protocol_version,
+            coverage_state=coverage_state,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class _WorkerResult:
+    """Internal result from a single parallel worker."""
+
+    results: list[CaseResult]
+    capabilities: dict
+    protocol_version: str
+    coverage_state: Any = None
+
+
+def _aggregate_results(
+    results: list[CaseResult],
+    total_duration_ms: float,
+    capabilities: dict,
+    protocol_version: str,
+    *,
+    started_at: str = "",
+    finished_at: str = "",
+    environment: dict[str, str] | None = None,
+    coverage: dict[str, Any] | None = None,
+) -> SessionResults:
+    """Build a ``SessionResults`` from a flat list of ``CaseResult``."""
+    passed = sum(1 for r in results if r.status == CaseStatus.PASSED)
+    failed = sum(1 for r in results if r.status == CaseStatus.FAILED)
+    errored = sum(1 for r in results if r.status == CaseStatus.ERROR)
+    skipped = sum(1 for r in results if r.status == CaseStatus.SKIPPED)
+    timed_out = sum(1 for r in results if r.status == CaseStatus.TIMEOUT)
+
+    cov = dict(coverage or {})
+    session = SessionResults(
+        test_results=results,
+        total_duration_ms=total_duration_ms,
+        server_capabilities=capabilities,
+        protocol_version=protocol_version,
+        harness_version=_HARNESS_VERSION,
+        passed=passed,
+        failed=failed,
+        errored=errored,
+        skipped=skipped,
+        timed_out=timed_out,
+        started_at=started_at,
+        finished_at=finished_at,
+        environment=dict(environment or {}),
+        coverage=cov,
+    )
+    session.unified_summary = build_unified_summary(session, cov or None)
+    attach_conformance(session)
+    return session

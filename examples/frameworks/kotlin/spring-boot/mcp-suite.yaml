@@ -1,0 +1,15 @@
+server:
+  command: java -jar build/libs/mcp-server-0.0.1-SNAPSHOT.jar
+  transport: stdio
+
+cases:
+  - name: Kotlin Spring echo
+    call: echo
+    args: { text: kotlin }
+    tags: [smoke, kotlin, spring-boot]
+
+  - name: Kotlin Spring latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 3000
+    tags: [perf, kotlin]

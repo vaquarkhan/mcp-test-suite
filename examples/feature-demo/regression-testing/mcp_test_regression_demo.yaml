@@ -1,0 +1,10 @@
+server:
+  command: "python -m your_server"
+
+test:
+  dirs:
+    - "examples/feature-demo/regression-testing"
+
+report:
+  format: html
+  output: "examples/feature-demo/regression-testing/reports/regression-demo.html"

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.vaquarkhan/mcp-test-suite",
+  "title": "MCP Test Suite",
+  "description": "Multi-language testing suite for MCP servers: declarative YAML, native adapters (Jest/JUnit/Go), and the mcp-test CLI (discovery, parallel runs, assertions, schema checks, JUnit/JSON/HTML/SARIF). Developer tooling; connects to your server process—this package is not an MCP server implementation.",
+  "repository": {
+    "url": "https://github.com/vaquarkhan/mcp-test-suite",
+    "source": "github"
+  },
+  "version": "4.0.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "mcp-test-suite",
+      "version": "4.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

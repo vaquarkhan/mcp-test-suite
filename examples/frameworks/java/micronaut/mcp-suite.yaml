@@ -1,0 +1,15 @@
+server:
+  command: java -jar build/libs/my-micronaut-mcp-0.1-all.jar
+  transport: stdio
+
+cases:
+  - name: Micronaut echo smoke
+    call: echo
+    args: { text: micronaut }
+    tags: [smoke, micronaut]
+
+  - name: Micronaut latency
+    call: echo
+    args: { text: ping }
+    max_latency_ms: 3000
+    tags: [perf, micronaut]

@@ -1,0 +1,11 @@
+server:
+  command: java -jar target/my-mcp-server-0.0.1-SNAPSHOT.jar
+  transport: stdio
+
+test:
+  dirs: [.]
+  timeout: 60
+
+report:
+  format: junit
+  output: reports/spring-boot-mcp.xml
