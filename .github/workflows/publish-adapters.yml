@@ -1,7 +1,7 @@
 name: Publish language adapters
 
-# Publishes adapters to GitHub Packages and attaches binaries to a GitHub Release.
-# Uses GITHUB_TOKEN only (no npmjs / Maven Central / nuget.org secrets).
+# Publishes adapters to GitHub Packages + Release (GITHUB_TOKEN).
+# Optional: Maven Central when secrets are set and maven_central=true.
 
 on:
   workflow_dispatch:
@@ -12,6 +12,10 @@ on:
         default: "4.0.0"
       dry_run:
         description: "Build only (no publish / no release)"
+        type: boolean
+        default: false
+      maven_central:
+        description: "Also publish JUnit adapter to Maven Central (needs CENTRAL_* + GPG secrets)"
         type: boolean
         default: false
 
@@ -138,6 +142,38 @@ jobs:
           name: xunit-nuget
           path: dist/nuget/*
           if-no-files-found: error
+
+  junit5-central:
+    name: junit5 → Maven Central
+    if: ${{ inputs.dry_run == false && inputs.maven_central == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java + Central + GPG
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Deploy to Maven Central
+        working-directory: adapters/junit5
+        env:
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${MAVEN_USERNAME:-}" ] || [ -z "${MAVEN_PASSWORD:-}" ] || [ -z "${{ secrets.GPG_PRIVATE_KEY }}" ]; then
+            echo "::error::Missing CENTRAL_USERNAME / CENTRAL_PASSWORD / GPG_PRIVATE_KEY — see docs/MAVEN_CENTRAL.md"
+            exit 1
+          fi
+          sed -i 's#<version>4.0.0</version>#<version>${{ inputs.version }}</version>#' pom.xml
+          mvn -B -Pmaven-central clean deploy -DskipTests
 
   packages-visibility:
     if: ${{ inputs.dry_run == false }}

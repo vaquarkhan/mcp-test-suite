@@ -18,7 +18,8 @@
 | [MULTI_LANGUAGE.md](MULTI_LANGUAGE.md) | Adapters + architecture |
 | [DOCKER.md](DOCKER.md) | Suite OCI image (PyPI engine) |
 | [DOWNLOADS.md](DOWNLOADS.md) | GitHub Packages + Releases (Maven / npm / NuGet / Go) |
-| [PUBLISHING.md](PUBLISHING.md) | Adapter publish via Actions (not PyPI engine) |
+| [MAVEN_CENTRAL.md](MAVEN_CENTRAL.md) | Publish JUnit adapter to Maven Central (secrets + GPG) |
+| [PUBLISHING.md](PUBLISHING.md) | Adapter publish via Actions |
 | [RELEASING.md](RELEASING.md) | Release checklist |
 | [NO_PYPI_FROM_THIS_REPO.md](NO_PYPI_FROM_THIS_REPO.md) | Engine vs connectors policy |
 | [IDE_INTEGRATION.md](IDE_INTEGRATION.md) | Cursor, Kiro, Google, ChatGPT, VS Code, Windsurf, JetBrains, … |
